@@ -7,6 +7,8 @@ from paths import IMG_PATH
 IMG_CACHE = {}
 EMOJIS = []
 
+font = ImageFont.truetype('segoeuil.ttf', 92)
+
 for file in os.listdir(IMG_PATH):
     filepath = os.path.join(IMG_PATH, file)
     try:
@@ -17,25 +19,30 @@ for file in os.listdir(IMG_PATH):
     except:
         pass
 
+blank_img = IMG_CACHE["blank.bmp"]
+ball_img = IMG_CACHE['ball.png']
+
+def create_sample():
+    img = create_background()
+    create_score(img, (0, 100))
+    bounding_box = create_ball(img, (0, 360))
+    populate_emotes(img, (10, 100))
+    return (img, bounding_box)
+
 def create_background():
-    blank_im = IMG_CACHE["blank.bmp"]
-    background_im = blank_im.copy()
+    background_im = blank_img.copy()
     return background_im
 
 def create_score(canvas, score_range):
-    font = ImageFont.truetype('segoeuil.ttf', 92)
-
     score = random.randint(*score_range)
     score_text = "{0}".format(score)
     score_width, score_height = font.getsize(score_text) 
-
-    draw = ImageDraw.Draw(canvas)
-
     width, height = canvas.size
 
     x = int(width/2-score_width/2)
     y = int(height/5-score_height/2)
 
+    draw = ImageDraw.Draw(canvas)
     draw.text((x, y), score_text, size=50, font=font, fill=(100, 100, 100))
 
 def populate_emotes(canvas, total):
@@ -51,7 +58,6 @@ def populate_emotes(canvas, total):
     
 # x_centre, y_centre, width, height - normalised to dimensions
 def create_ball(canvas, rotation_range):
-    ball_img = IMG_CACHE['ball.png']
     background_width, background_height = canvas.size
     ball_width, ball_height = ball_img.size
 
@@ -68,10 +74,5 @@ def create_ball(canvas, rotation_range):
     return (x_centre_norm, y_centre_norm, width_norm, height_norm)
 
 
-def create_sample():
-    img = create_background()
-    create_score(img, (0, 100))
-    bounding_box = create_ball(img, (0, 360))
-    populate_emotes(img, (10, 100))
-    return (img, bounding_box)
+
 
