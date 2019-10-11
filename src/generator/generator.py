@@ -2,11 +2,8 @@ import numpy as np
 import os
 import random
 from PIL import Image, ImageDraw, ImageFont
+from paths import IMG_PATH
 
-ASSETS_PATH = "../../assets/"
-IMG_PATH = os.path.join(ASSETS_PATH, "icons")
-FONT_PATH = os.path.join(ASSETS_PATH, "fonts")
-SAVE_PATH = os.path.join(ASSETS_PATH, "samples")
 IMG_CACHE = {}
 EMOJIS = []
 
@@ -40,7 +37,6 @@ def create_score(canvas, score_range):
     y = int(height/5-score_height/2)
 
     draw.text((x, y), score_text, size=50, font=font, fill=(100, 100, 100))
-    return canvas
 
 def populate_emotes(canvas, total):
     lower, upper = total
@@ -53,8 +49,7 @@ def populate_emotes(canvas, total):
         y = random.randint(0, height-1)
         canvas.paste(emote_img, (x, y), emote_img)
     
-    return canvas
-
+# x_centre, y_centre, width, height - normalised to dimensions
 def create_ball(canvas, rotation_range):
     ball_img = IMG_CACHE['ball.png']
     background_width, background_height = canvas.size
@@ -66,12 +61,17 @@ def create_ball(canvas, rotation_range):
 
     canvas.paste(ball_img.rotate(rotation), (x, y), ball_img)
 
-    return canvas
+    x_centre, y_centre = x+ball_width/2, y+ball_height/2    
+    x_centre_norm, y_centre_norm = x_centre/background_width, y_centre/background_height
+    width_norm, height_norm = ball_width/background_width, ball_height/background_height
+
+    return (x_centre_norm, y_centre_norm, width_norm, height_norm)
+
 
 def create_sample():
     img = create_background()
     create_score(img, (0, 100))
-    create_ball(img, (0, 360))
+    bounding_box = create_ball(img, (0, 360))
     populate_emotes(img, (10, 100))
-    return img
+    return (img, bounding_box)
 

@@ -1,21 +1,35 @@
 import os
 import argparse
-from generator import create_sample, SAVE_PATH
+from generator import create_sample
+from paths import DATA_PATH, LABELS_PATH
 
 def main():    
     parser = argparse.ArgumentParser()
+    seed_folder(DATA_PATH)
+    seed_folder(LABELS_PATH)
 
-    img_format = "png"
-    if not os.path.exists(SAVE_PATH):
-        os.mkdir(SAVE_PATH)
-
-    total_samples = 10000
+    total_samples = 100
     for i in range(0, total_samples):
         if (i+1) % 10 == 0:
             print('\r{0}/{1}'.format(i+1, total_samples), end='')
-        file = "sample_{0}.{1}".format(i, img_format)
-        sample_img = create_sample()
-        sample_img.save(os.path.join(SAVE_PATH, file), format=img_format)
+        filename = "sample_{0}".format(i)
+        sample = create_sample()
+        save_sample(sample, filename)
+
+def save_sample(sample, filename, img_format="JPEG"):
+    img, (x_centre, y_centre, width, height) = sample
+    # create image
+    img_name = "{0}.{1}".format(filename, img_format)
+    img.save(os.path.join(DATA_PATH, img_name), format=img_format)
+    # create labels
+    labels_name = "{0}.txt".format(filename)
+    with open(os.path.join(LABELS_PATH, labels_name), "w") as file:
+        file.write("0 {0} {1} {2} {3}".format(x_centre, y_centre, width, height))
+
+def seed_folder(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+    
 
 if __name__ == '__main__':
     main()
