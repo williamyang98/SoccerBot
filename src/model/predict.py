@@ -40,7 +40,7 @@ def parse_images(model, filepaths, output_dir):
     for i, filepath in enumerate(filepaths):
         filename = os.path.basename(filepath)
         if (i+1) % 10 == 0:
-            print("\r{0}/{1} @ {2}ms/sample".format(i+1, count, 1000*sum(times)/len(times)), end="")
+            print("\r{0}/{1} @ {2:.02f}ms/sample".format(i+1, count, 1000*sum(times)/len(times)), end="")
         try:
             output_img, elapsed_time = parse_image(model, filepath)
             output_img.save(os.path.join(output_dir, filename))
