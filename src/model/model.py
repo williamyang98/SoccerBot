@@ -4,7 +4,7 @@ import tensorflow.keras as keras
 from evaluation import calculate_IOU, calculate_loss
 
 class Model:
-    def __init__(self, input_shape=(256, 256, 3), output_shape=(1,4), hyperparams={}):
+    def __init__(self, input_shape, output_shape, hyperparams={}):
         self.model = self.build_model(input_shape, output_shape, hyperparams)
     
     def fit(self, X, Y, hyperparams):
@@ -31,7 +31,13 @@ class Model:
         alpha = 0.2
 
         layers = [
-			keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1, input_shape=input_shape),
+            keras.layers.Conv2D(16, kernel_size=(3, 3), strides=1, input_shape=input_shape),
+			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Conv2D(16, kernel_size=(3, 3), strides=1),
+			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+			keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
 			keras.layers.LeakyReLU(alpha=alpha),
 			keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
 			keras.layers.LeakyReLU(alpha=alpha),
@@ -43,13 +49,31 @@ class Model:
 			keras.layers.LeakyReLU(alpha=alpha),
 			keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
-            # flatten for fully connected network
+			keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
+			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
+			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+			keras.layers.Conv2D(256, kernel_size=(3, 3), strides=1),
+			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Conv2D(256, kernel_size=(3, 3), strides=1),
+			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
 			keras.layers.Flatten(),
 
+			keras.layers.Dense(1240),
+			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Dense(640),
+			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Dense(480),
+			keras.layers.LeakyReLU(alpha=alpha),
 			keras.layers.Dense(120),
 			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Dense(40),
+			keras.layers.Dense(62),
 			keras.layers.LeakyReLU(alpha=alpha),
+
 			keras.layers.Dense(4),
 			keras.layers.LeakyReLU(alpha=alpha),
         ]

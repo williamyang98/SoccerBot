@@ -55,8 +55,8 @@ def get_labels(filepath):
     return labels
 
 def get_pixel_data(filepath):
-    img = Image.open(filepath, mode='r')
-    pixel_data = np.asarray(img) / 255 # normalise
+    with Image.open(filepath, mode='r') as img:
+        pixel_data = np.asarray(img) / 255 # normalise
     return pixel_data
 
 if __name__ == '__main__':
