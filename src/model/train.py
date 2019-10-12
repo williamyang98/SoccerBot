@@ -1,11 +1,8 @@
 from model import Model
 import numpy as np
 import os
+from paths import DATA_DIR, MODEL_DIR
 from evaluation import calculate_IOU, calculate_loss
-
-ASSETS_DIR = "../../assets"
-DATA_DIR = os.path.join(ASSETS_DIR, "data")
-MODEL_DIR = os.path.join(ASSETS_DIR, "model")
 
 def main():
     x_train = np.load(os.path.join(DATA_DIR, "x_train.npy"))
@@ -22,12 +19,11 @@ def main():
         'validation_data': (x_test, y_test)
     }
 
-    model = Model(x_train[0].shape, y_train[0].shape, hyperparams)
+    model = Model((256,256,3), (4,), hyperparams)
     model.load(os.path.join(MODEL_DIR, "model.h5"))
     model.summary()
 
     model.fit(x_train, y_train, hyperparams)
-    #print(model.predict(x_test[:1]))
     model.save(os.path.join(MODEL_DIR, "model.h5"))
 
 if __name__ == '__main__':
