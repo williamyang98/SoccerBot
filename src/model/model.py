@@ -31,51 +31,29 @@ class Model:
         alpha = 0.2
 
         layers = [
-            keras.layers.Conv2D(16, kernel_size=(3, 3), strides=1, input_shape=input_shape),
-			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Conv2D(16, kernel_size=(3, 3), strides=1),
-			keras.layers.LeakyReLU(alpha=alpha),
+            keras.layers.Conv2D(16, kernel_size=(3, 3), activation="relu", strides=1, input_shape=input_shape),
 			keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
-			keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
-			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
-			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Conv2D(32, kernel_size=(3, 3), activation="relu", strides=1),
 			keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
-			keras.layers.Conv2D(64, kernel_size=(3, 3), strides=1),
-			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Conv2D(64, kernel_size=(3, 3), strides=1),
-			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Conv2D(64, kernel_size=(3, 3), activation="relu", strides=1),
 			keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
-			keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
-			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
-			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Conv2D(128, kernel_size=(3, 3), activation="relu", strides=1),
 			keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
-			keras.layers.Conv2D(256, kernel_size=(3, 3), strides=1),
-			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Conv2D(256, kernel_size=(3, 3), strides=1),
-			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Conv2D(256, kernel_size=(3, 3), activation="relu", strides=1),
 			keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
 			keras.layers.Flatten(),
 
-			keras.layers.Dense(1240),
-			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Dense(640),
-			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Dense(480),
-			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Dense(120),
-			keras.layers.LeakyReLU(alpha=alpha),
-			keras.layers.Dense(62),
-			keras.layers.LeakyReLU(alpha=alpha),
-
-			keras.layers.Dense(4),
-			keras.layers.LeakyReLU(alpha=alpha),
+			keras.layers.Dense(1240, activation="relu"),
+			keras.layers.Dense(640, activation="relu"),
+			keras.layers.Dense(480, activation="relu"),
+			keras.layers.Dense(120, activation="relu"),
+			keras.layers.Dense(62, activation="relu"),
+			keras.layers.Dense(4, activation="relu"),
         ]
 
         model = keras.Sequential(layers)
