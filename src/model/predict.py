@@ -57,10 +57,12 @@ def parse_images(model, filepaths, output_dir):
 
 def parse_image(model, input_file):
     img = Image.open(input_file)
+    start = default_timer()
     X = convert_image(img)
-    Y, elapsed_time = predict(model, X)
+    Y = predict(model, X)
+    end = default_timer()
     draw_bounding_box(img, Y)
-    return (img, elapsed_time)
+    return (img, (end-start))
 
 def draw_bounding_box(img, bounding_box):
     width, height = img.size
@@ -77,11 +79,8 @@ def draw_bounding_box(img, bounding_box):
     draw.rectangle(rect, outline=(255,0,0), width=2)
 
 def predict(model, X):
-    start = default_timer()
     Y = model.predict(np.asarray([X]))[0]
-    end = default_timer()
-    elapsed = end-start
-    return (Y, elapsed)
+    return Y
 
 def convert_image(img):
     img = img.resize((256,256))
