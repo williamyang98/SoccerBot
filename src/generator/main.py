@@ -26,7 +26,7 @@ def main():
 
 def save_sample(sample, filename, img_format="JPEG"):
     img, (x_centre, y_centre, width, height) = sample
-    # img = img.resize(IMAGE_SIZE)
+    img = img.resize(IMAGE_SIZE)
     # create image
     img_name = "{0}.{1}".format(filename, img_format)
     img.save(os.path.join(DATA_PATH, img_name), format=img_format)
