@@ -2,8 +2,8 @@ import pyautogui
 from pynput.keyboard import *
 import numpy as np
 import mss
-import mss.tools
 import cv2
+from timeit import default_timer
 from PIL import Image
 
 from model.lite_model import LiteModel
@@ -66,11 +66,9 @@ def display_controls():
     print('Don\'t need to Press F1 to start ...')
 
 # Number of pixels under ball center to click
-delay = 0.00 # in seconds
+delay = 0.2 
 
 def main():
-    desiredscore = 10000
-    currentscore = 0
     lis = Listener(on_press=on_press)
     lis.start()
 
@@ -78,14 +76,21 @@ def main():
 
     display_controls()
 
+
     with open("../assets/model/quantized-model.tflite", "rb") as file:
         model = LiteModel(file.read())
 
+    last_click = default_timer()
     while running:
         centreX, centreY = find_ball(model, rect)
         centreX = centreX + rect['left']
         centreY = centreY + rect['top'] 
-        pyautogui.click(x=centreX, y=centreY)
+        current_time = default_timer()
+        pyautogui.moveTo(x=centreX, y=centreY)
+        if current_time-last_click > delay:
+            last_click = current_time
+            pyautogui.click(x=centreX, y=centreY)
+
            
     lis.stop()
 
