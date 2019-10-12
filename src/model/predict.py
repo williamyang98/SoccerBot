@@ -8,6 +8,7 @@ import glob
 from model import Model
 from lite_model import LiteModel
 from paths import MODEL_DIR, ASSETS_DIR
+from evaluation import calculate_IOU, calculate_loss
 
 INPUT_SIZE = (256, 256, 3)
 
@@ -23,7 +24,9 @@ def main():
     # fetch appropriate model
     if not args.lite:
         model = Model(INPUT_SIZE, (4,))
-        model.load(args.model)
+        model.load(
+            args.model,
+            {'calculate_loss': calculate_loss, 'calculate_IOU': calculate_IOU})
     else:
         print("Loading quantized model: {0}".format(args.model))
         with open(args.model, 'rb') as file:
