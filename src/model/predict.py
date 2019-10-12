@@ -23,6 +23,7 @@ def main():
 
     # fetch appropriate model
     if not args.lite:
+        print("Loading full model: {0}".format(args.model))
         model = Model(INPUT_SIZE, (4,))
         model.load(
             args.model,
