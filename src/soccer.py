@@ -66,7 +66,7 @@ def display_controls():
     print('Don\'t need to Press F1 to start ...')
 
 # Number of pixels under ball center to click
-delay = 0.2 
+delay = 0.1 
 
 def main():
     lis = Listener(on_press=on_press)
@@ -80,19 +80,59 @@ def main():
     with open("../assets/model/quantized-model.tflite", "rb") as file:
         model = LiteModel(file.read())
 
-    last_click = default_timer()
+    last_falling_time = default_timer()
+    consecutive_up_samples = 0
+
+    lastX = rect['left'] 
+    lastY = rect['top']
+    lastTime = 0
+    lastDelay = 0
     while running:
+        start = default_timer()
         centreX, centreY = find_ball(model, rect)
         centreX = centreX + rect['left']
         centreY = centreY + rect['top'] 
+
+        deltaX = centreX-lastX
+        deltaY = centreY-lastY
+
         current_time = default_timer()
+        delay = current_time-start
+
+        delta_time = lastDelay + (start-lastTime)
+        velocity_x = deltaX/delta_time
+        velocity_y = deltaY/delta_time
+
+        lastX = centreX
+        lastY = centreY
+        lastTime = current_time
+        lastDelay = delay
+
+        centreX = int(centreX + velocity_x*delay)
+        centreY = int(centreY + velocity_y*delay)
+
         pyautogui.moveTo(x=centreX, y=centreY)
-        if current_time-last_click > delay:
-            last_click = current_time
-            pyautogui.click(x=centreX, y=centreY)
+        if deltaY <= 0:
+            consecutive_up_samples += 1
+            if consecutive_up_samples > 5:
+                consecutive_up_samples = 0
+                last_falling_time = default_timer()
+        else:
+            consecutive_up_samples = 0
+
+        if current_time-last_falling_time > delay and deltaY > 0 and check_mouse_inside(rect, (centreX, centreY)):
+            pyautogui.click(x=centreX, y=centreY+40)
 
            
     lis.stop()
+
+def check_mouse_inside(rect, pos):
+    x, y = pos
+    if x <= rect['left'] or x >= rect['left']+rect['width']:
+        return False
+    if y <= rect['top'] or y >= rect['top']+rect['height']:
+        return False
+    return True
 
 
 if __name__ == "__main__":
