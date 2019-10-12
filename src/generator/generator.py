@@ -2,12 +2,12 @@ import numpy as np
 import os
 import random
 from PIL import Image, ImageDraw, ImageFont
-from paths import IMG_PATH
+from paths import IMG_PATH, ASSETS_PATH
 
 IMG_CACHE = {}
 EMOJIS = []
 
-font = ImageFont.truetype('segoeuil.ttf', 92)
+font = ImageFont.truetype(os.path.join(ASSETS_PATH, "fonts", "segoeuil.ttf"), 92)
 
 for file in os.listdir(IMG_PATH):
     filepath = os.path.join(IMG_PATH, file)
