@@ -4,19 +4,26 @@ from PIL import Image
 import numpy as np
 from sklearn.model_selection import train_test_split
 import argparse
+import random
 
 ASSETS_DIR = "../../assets/"
+DEFAULT_IMAGE_DIR = os.path.join(ASSETS_DIR, "samples", "*JPEG")
 
-image_files = glob.glob(os.path.join(ASSETS_DIR, "samples", "*JPEG"))
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--ratio", type=float, default=0.3)
     parser.add_argument("--save-dir", type=str, default=os.path.join(ASSETS_DIR, "data"))
     parser.add_argument("--max-samples", type=int, default=3000)
+    parser.add_argument("--shuffle", action="store_true")
+    parser.add_argument("--dir", type=str, default=DEFAULT_IMAGE_DIR)
     args = parser.parse_args()
-
-    x, y = get_training_data(args.max_samples)
+    # load files
+    files = glob.glob(args.dir)
+    if args.shuffle:
+        random.shuffle(files)
+    files = files[:args.max_samples]
+    x, y = get_training_data(files)
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=args.ratio)
     # save to file
     np.save(os.path.join(args.save_dir, "x_train.npy"), x_train)
@@ -24,11 +31,11 @@ def main():
     np.save(os.path.join(args.save_dir, "y_train.npy"), y_train)
     np.save(os.path.join(args.save_dir, "y_test.npy"), y_test)
 
-def get_training_data(max_samples):
+def get_training_data(image_files):
     x_train = []
     y_train = []
-    total = min(len(image_files), max_samples)
-    for count, image_file in enumerate(image_files[:max_samples]):
+    total = len(image_files)
+    for count, image_file in enumerate(image_files):
         if (count+1) % 10 == 0:
             print("\r{0}/{1}".format(count+1, total), end='') 
 
@@ -47,13 +54,11 @@ def get_training_data(max_samples):
     return (np.array(x_train), np.array(y_train))
 
 def get_labels(filepath):
-    labels = []
     with open(filepath, "r") as file:
         for line in file.readlines():
             id, x_centre, y_centre, width, height = map(float, line.strip().split(' '))
             label = (x_centre, y_centre, width, height)
-            labels.append(np.asarray(label))
-    return labels
+            return label
 
 def get_pixel_data(filepath):
     with Image.open(filepath, mode='r') as img:
