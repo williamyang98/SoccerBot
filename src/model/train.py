@@ -20,10 +20,14 @@ def main():
     }
 
     model = Model((256,256,3), (4,), hyperparams)
-    model.load(os.path.join(MODEL_DIR, "model.h5"))
+    model.load(
+        os.path.join(MODEL_DIR, "model.h5"), 
+        {'calculate_loss': calculate_loss, 'calculate_IOU': calculate_IOU})
+    # model.load_weights(os.path.join(MODEL_DIR, "model-weights.h5"))
     model.summary()
 
     model.fit(x_train, y_train, hyperparams)
+    model.evaluate(x_test, y_test)
     model.save(os.path.join(MODEL_DIR, "model.h5"))
 
 if __name__ == '__main__':

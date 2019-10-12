@@ -3,15 +3,13 @@ import tensorflow.keras as keras
 
 class Model:
     def __init__(self, input_shape, output_shape, hyperparams={}):
-        self.model = self.build_model(input_shape, output_shape, hyperparams)
+        self.model = self.build(input_shape, output_shape, hyperparams)
     
     def fit(self, X, Y, hyperparams):
         self.model.fit(X, Y,
             batch_size=hyperparams.get('batch_size', 100),
             epochs=hyperparams.get('epochs', 10),
             validation_data=hyperparams.get('validation_data'))
-        
-        self.summary()
 
     def summary(self):
         self.model.summary()
@@ -21,14 +19,20 @@ class Model:
 
     def predict(self, X):
         return self.model.predict(X)
+
+    def load(self, filepath, custom_objects={}):
+        self.model = keras.models.load_model(filepath, custom_objects=custom_objects)
     
     def save(self, filepath):
+        self.model.save(filepath)
+    
+    def save_weights(self, filepath):
         self.model.save_weights(filepath)
     
-    def load(self, filepath):
+    def load_weights(self, filepath):
         self.model.load_weights(filepath)
     
-    def build_model(self, input_shape, output_shape, hyperparams):
+    def build(self, input_shape, output_shape, hyperparams):
         alpha = 0.2
 
         layers = [
