@@ -34,7 +34,7 @@ def main():
             {'calculate_loss': calculate_loss, 'calculate_IOU': calculate_IOU})
         # model.load_weights(os.path.join(MODEL_DIR, "model-weights.h5"))
     except IOError:
-        print("Unable to load model: {0}".format())
+        print("Unable to load model: {0}".format(args.model_in))
 
     model.summary()
 
