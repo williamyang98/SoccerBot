@@ -13,9 +13,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--ratio", type=float, default=0.3)
     parser.add_argument("--save-dir", type=str, default=os.path.join(ASSETS_DIR, "data"))
+    parser.add_argument("--max-samples", type=int, default=3000)
     args = parser.parse_args()
 
-    x, y = get_training_data()
+    x, y = get_training_data(args.max_samples)
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=args.ratio)
     # save to file
     np.save(os.path.join(args.save_dir, "x_train.npy"), x_train)
@@ -23,11 +24,11 @@ def main():
     np.save(os.path.join(args.save_dir, "y_train.npy"), y_train)
     np.save(os.path.join(args.save_dir, "y_test.npy"), y_test)
 
-def get_training_data():
+def get_training_data(max_samples):
     x_train = []
     y_train = []
-    total = len(image_files)
-    for count, image_file in enumerate(image_files):
+    total = min(len(image_files), max_samples)
+    for count, image_file in enumerate(image_files[:max_samples]):
         if (count+1) % 10 == 0:
             print("\r{0}/{1}".format(count+1, total), end='') 
 
