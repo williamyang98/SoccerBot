@@ -20,7 +20,7 @@ def map_bounding_box(bounding_box, shape):
 
     return (x_centre, y_centre, width, height)
 
-def draw_bounding_box(image, bounding_box):
+def draw_bounding_box(image, bounding_box, colour=(0, 20, 200)):
     mapped_bounding_box = map_bounding_box(bounding_box, image.shape[:2])
     x_centre, y_centre, width, height = mapped_bounding_box
 
@@ -29,5 +29,5 @@ def draw_bounding_box(image, bounding_box):
     top = int(y_centre-height/2)
     bottom = int(y_centre+height/2)
     
-    cv2.rectangle(image, (left, top), (right, bottom), (0, 20, 200), 2)
+    cv2.rectangle(image, (left, top), (right, bottom), colour, 2)
     return image
