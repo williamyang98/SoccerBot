@@ -16,7 +16,7 @@ MODEL_DIR = "assets/model/"
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-files", default=os.path.join(IMAGES_DIR, "samples", "*JPEG"))
+    parser.add_argument("--input-files", default=os.path.join(IMAGES_DIR, "*JPEG"))
     parser.add_argument("--output-dir", default=os.path.join(PREDICTION_DIR))
     parser.add_argument("--model", type=str, default=os.path.join(MODEL_DIR, "model.h5"))
     parser.add_argument("--lite", action="store_true")
@@ -47,7 +47,7 @@ def parse_images(model, filepaths, output_dir):
             print("\r{0}/{1} @ {2:.02f}ms/sample".format(i+1, count, 1000*sum(times)/len(times)), end="")
         try:
             output_img, elapsed_time = parse_image(model, filepath)
-            Image.fromarray(output_img, mode="RGBA").save(os.path.join(output_dir, filename))
+            Image.fromarray(output_img).save(os.path.join(output_dir, filename))
             times.append(elapsed_time)
         except Exception as ex:
             print("Couldn't process image: {0}".format(filepath))
