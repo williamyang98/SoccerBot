@@ -69,11 +69,12 @@ class Predictor:
         x, y, width, height = bounding_box
         last_x, last_y, _, _ = self.last_bounding_box
         # calculate velocity
-        dx, dy = (x-last_x), (y-last_y)
-        real_x = x +  dx
-        real_y = y + dy 
-        if dy != 0 and dx != 0:
-            real_y += self.acceleration*dt # when ball is stationary
+        delay = end - curr_time
+        vx, vy = (x-last_x)/dt, (y-last_y)/dt
+        real_x = x +  vx*delay
+        real_y = y + vy*delay 
+        if vy != 0 and vx != 0:
+            real_y += self.acceleration*0.5*delay**2 # when ball is stationary
 
         real_bounding_box = (real_x, real_y, width, height)
 
@@ -95,6 +96,7 @@ class Predictor:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--preview", action='store_true')
+    parser.add_argument("--model", default="assets/model/quantized-model.tflite")
 
     args = parser.parse_args()
 
@@ -103,7 +105,7 @@ def main():
     app = App()
     app.start()
 
-    with open("assets/model/quantized-model.tflite", "rb") as file:
+    with open(args.model, "rb") as file:
         model = LiteModel(file.read())
     
     predictor = Predictor(model)
