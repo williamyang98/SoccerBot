@@ -1,5 +1,6 @@
 import tensorflow as tf
 import tensorflow.keras as keras
+from .evaluation import calculate_IOU, calculate_loss
 
 class Model:
     def __init__(self, input_shape, output_shape, hyperparams={}):
@@ -20,17 +21,17 @@ class Model:
     def predict(self, X):
         return self.model.predict(X)
 
-    def load(self, filepath, custom_objects={}):
-        self.model = keras.models.load_model(filepath, custom_objects=custom_objects)
+    def load(self, filepath):
+        self.model = keras.models.load_model(
+            filepath, 
+            custom_objects={
+                "calculate_IOU": calculate_IOU,
+                "calculate_loss": calculate_loss
+            })
     
     def save(self, filepath):
         self.model.save(filepath)
     
-    def save_weights(self, filepath):
-        self.model.save_weights(filepath)
-    
-    def load_weights(self, filepath):
-        self.model.load_weights(filepath)
     
     def build(self, input_shape, output_shape, hyperparams):
         layers = [
@@ -62,7 +63,7 @@ class Model:
         model = keras.Sequential(layers)
         model.compile(
             optimizer=keras.optimizers.Adam(lr=hyperparams.get("learning_rate", 0.0001)),
-            loss=hyperparams.get("loss", "mse"),
-            metrics=hyperparams.get("metrics", ["accuracy"])
+            loss=calculate_loss,
+            metrics=hyperparams.get("metrics", [calculate_IOU, "accuracy"])
         )
         return model

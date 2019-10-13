@@ -6,8 +6,8 @@ from src.generator import GeneratorConfig, BasicSampleGenerator
 
 ASSETS_PATH = "assets/"
 ICONS_PATH = os.path.join(ASSETS_PATH, "icons")
-IMAGES_OUTPUT_PATH = os.path.join(ASSETS_PATH, "samples")
-LABELS_OUTPUT_PATH = os.path.join(ASSETS_PATH, "labels")
+IMAGES_OUTPUT_PATH = os.path.join(ASSETS_PATH, "data", "samples")
+LABELS_OUTPUT_PATH = os.path.join(ASSETS_PATH, "data", "labels")
 
 def main():    
     parser = argparse.ArgumentParser()

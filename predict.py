@@ -1,21 +1,23 @@
-from PIL import Image, ImageDraw
+from PIL import Image
 from timeit import default_timer
 import argparse
 import numpy as np
 import os
 import glob
 
-from model import Model
-from lite_model import LiteModel
-from paths import MODEL_DIR, ASSETS_DIR
-from evaluation import calculate_IOU, calculate_loss
+from src.model import Model, LiteModel
+from src.util import *
 
 INPUT_SIZE = (256, 256, 3)
 
+IMAGES_DIR = "assets/data/samples/"
+PREDICTION_DIR = "assets/predictions/"
+MODEL_DIR = "assets/model/"
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-files", default=os.path.join(ASSETS_DIR, "samples", "*JPEG"))
-    parser.add_argument("--output-dir", default=os.path.join(ASSETS_DIR, "predictions"))
+    parser.add_argument("--input-files", default=os.path.join(IMAGES_DIR, "samples", "*JPEG"))
+    parser.add_argument("--output-dir", default=os.path.join(PREDICTION_DIR))
     parser.add_argument("--model", type=str, default=os.path.join(MODEL_DIR, "model.h5"))
     parser.add_argument("--lite", action="store_true")
 
@@ -25,9 +27,7 @@ def main():
     if not args.lite:
         print("Loading full model: {0}".format(args.model))
         model = Model(INPUT_SIZE, (4,))
-        model.load(
-            args.model,
-            {'calculate_loss': calculate_loss, 'calculate_IOU': calculate_IOU})
+        model.load(args.model)
     else:
         print("Loading quantized model: {0}".format(args.model))
         with open(args.model, 'rb') as file:
@@ -47,7 +47,7 @@ def parse_images(model, filepaths, output_dir):
             print("\r{0}/{1} @ {2:.02f}ms/sample".format(i+1, count, 1000*sum(times)/len(times)), end="")
         try:
             output_img, elapsed_time = parse_image(model, filepath)
-            output_img.save(os.path.join(output_dir, filename))
+            Image.fromarray(output_img, mode="RGBA").save(os.path.join(output_dir, filename))
             times.append(elapsed_time)
         except Exception as ex:
             print("Couldn't process image: {0}".format(filepath))
@@ -56,36 +56,16 @@ def parse_images(model, filepaths, output_dir):
     print()
 
 def parse_image(model, input_file):
-    img = Image.open(input_file)
+    image = Image.open(input_file)
+    image = np.array(image)
+
     start = default_timer()
-    X = convert_image(img)
-    Y = predict(model, X)
+    bounding_box = predict_bounding_box(model, image)
     end = default_timer()
-    draw_bounding_box(img, Y)
-    return (img, (end-start))
 
-def draw_bounding_box(img, bounding_box):
-    width, height = img.size
-    x_centre_norm, y_centre_norm, width_norm, height_norm = bounding_box
-
-    left = (x_centre_norm-width_norm/2.0)*width
-    right = (x_centre_norm+width_norm/2.0)*width
-    top = (y_centre_norm-height_norm/2.0)*height
-    bottom = (y_centre_norm+height_norm/2.0)*height
-
-    rect = [(left, top), (right, bottom)]
-
-    draw = ImageDraw.Draw(img)
-    draw.rectangle(rect, outline=(255,0,0), width=2)
-
-def predict(model, X):
-    Y = model.predict(np.asarray([X]))[0]
-    return Y
-
-def convert_image(img):
-    img = img.resize((256,256))
-    X = np.asarray(img) / 255
-    return X
+    draw_bounding_box(image, bounding_box)
+    elapsed = end-start
+    return (image, elapsed)
 
 if __name__ == '__main__':
     main()

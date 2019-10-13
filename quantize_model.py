@@ -1,23 +1,25 @@
 import os
 import tensorflow as tf
+import argparse
 
-from model import Model
-from evaluation import calculate_IOU, calculate_loss
-from paths import ASSETS_DIR, MODEL_DIR
+from src.model import Model
+
+MODEL_DIR = "assets/model/"
 
 def main():
-    model_filepath = os.path.join(MODEL_DIR, "model.h5")
-    output_filepath = os.path.join(MODEL_DIR, "quantized-model.tflite")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model-in", default=os.path.join(MODEL_DIR, "model.h5"))
+    parser.add_argument("--model-out", default=os.path.join(MODEL_DIR, "quantized-model.tflite"))
+
+    args = parser.parse_args()
 
     # create using weights
     model = Model((256,256,3), (4,))
-    model.load(
-        model_filepath, 
-        {'calculate_loss': calculate_loss, 'calculate_IOU': calculate_IOU})
+    model.load(args.model_in)
 
     # quantize and store as bytefile
     quantized_model = convert(model.model)
-    with open(output_filepath, 'wb+') as file:
+    with open(args.model_out, 'wb+') as file:
         file.write(quantized_model)
 
 def convert(model):
