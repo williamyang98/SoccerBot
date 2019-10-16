@@ -15,15 +15,19 @@ def create_score(canvas, font, score_range):
     draw = ImageDraw.Draw(canvas)
     draw.text((x, y), score_text, size=50, font=font, fill=(100, 100, 100))
 
-def populate_emotes(canvas, emotes, total):
+def populate_emotes(canvas, emotes, total, rect=(0, 0, 1, 1)):
     lower, upper = total
     width, height = canvas.size
+
+    left, top, right, bottom = rect
+    left, right = left*width, right*width
+    top, bottom = top*height, bottom*height
 
     total_emotes = random.randint(lower, upper)
     for _ in range(total_emotes):
         emote_img = random.choice(emotes)
-        x = random.randint(0, width-1)
-        y = random.randint(0, height-1)
+        x = int(random.uniform(left, right))
+        y = int(random.uniform(top, bottom))
         canvas.paste(emote_img, (x, y), emote_img)
     
 # x_centre, y_centre, width, height - normalised to dimensions

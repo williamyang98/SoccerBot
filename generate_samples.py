@@ -38,14 +38,15 @@ def main():
         label_filepath = os.path.join(args.labels_dir, "{0}.txt".format(filename))
         save_label(bounding_box, label_filepath)
 
-def save_image(image, filepath, size=(256,256)):
-    image = image.resize(size)
+def save_image(image, filepath, size=None):
+    if size:
+        image = image.resize(size)
     image.save(filepath)
 
 def save_label(bounding_box, filepath):
-    x_centre, y_centre, width, height = bounding_box
+    x_centre, y_centre, width, height, confidence = bounding_box
     with open(filepath, "w") as file:
-        file.write("0 {0} {1} {2} {3}".format(x_centre, y_centre, width, height))
+        file.write("{0} {1} {2} {3} {4}".format(x_centre, y_centre, width, height, confidence))
 
 def get_generator_config(icons_dir):
     config = GeneratorConfig()
