@@ -2,16 +2,26 @@ import numpy as np
 import os
 import argparse
 
+from keras.preprocessing.image import ImageDataGenerator
+from keras import regularizers, optimizers
+import pandas as pd
+import numpy as np
+
 from src.model import Model
 
 MODEL_DIR = "assets/model/"
-DATA_DIR = "assets/data/compressed"
+DATA_DIR = "assets/data/"
+LABELS_FILE = os.path.join(DATA_DIR, "labels.txt")
+IMAGES_DIR = os.path.join(DATA_DIR, "samples")
+
+TARGET_SIZE = (160, 227)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-in", default=os.path.join(MODEL_DIR, "model.h5"))
     parser.add_argument("--model-out", default=os.path.join(MODEL_DIR, "model.h5"))
-    parser.add_argument("--training-data-dir", default=DATA_DIR)
+    parser.add_argument("--labels", default=LABELS_FILE)
+    parser.add_argument("--images-dir", default=IMAGES_DIR)
     # hypeparams
     parser.add_argument("--learning-rate", type=float, default=0.0001)
     parser.add_argument("--batch-size", type=int, default=100)
@@ -19,19 +29,35 @@ def main():
 
     args = parser.parse_args()
 
-    x_train = np.load(os.path.join(args.training_data_dir, "x_train.npy"))
-    y_train = np.load(os.path.join(args.training_data_dir, "y_train.npy"))
-    x_test = np.load(os.path.join(args.training_data_dir, "x_test.npy"))
-    y_test = np.load(os.path.join(args.training_data_dir, "y_test.npy"))
+    image_gen = ImageDataGenerator(validation_split=0.2, rescale=1.0/255.0)
+    dataframe = pd.read_csv(args.labels, delim_whitespace=True)
+
+    training_generator = image_gen.flow_from_dataframe(
+        dataframe=dataframe,
+        directory=args.images_dir,
+        x_col="filename",
+        y_col=["x_centre", "y_centre", "width", "height"],
+        subset="training",
+        batch_size=args.batch_size,
+        class_mode="raw",
+        target_size=TARGET_SIZE)
+
+    validation_generator = image_gen.flow_from_dataframe(
+        dataframe=dataframe,
+        directory=args.images_dir,
+        x_col="filename",
+        y_col=["x_centre", "y_centre", "width", "height"],
+        subset="validation",
+        batch_size=args.batch_size,
+        class_mode="raw",
+        target_size=TARGET_SIZE)
 
     hyperparams = {
         'learning_rate': args.learning_rate,
-        'batch_size': args.batch_size,
-        'epochs': args.epochs,
-        'validation_data': (x_test, y_test)
     }
 
-    model = Model((256,256,3), (4,), hyperparams)
+    model = Model(TARGET_SIZE+(3,), (4,), hyperparams)
+
     try:
         model.load(args.model_in)
     except IOError:
@@ -39,8 +65,19 @@ def main():
 
     model.summary()
 
-    model.fit(x_train, y_train, hyperparams)
-    model.evaluate(x_test, y_test)
+    steps_per_epoch = training_generator.n//training_generator.batch_size
+    validation_steps = validation_generator.n//validation_generator.batch_size
+
+    print("steps per epoch: {0}".format(steps_per_epoch))
+    print("validation steps {0}".format(validation_steps))
+
+    model.fit_generator(
+        generator=training_generator,
+        steps_per_epoch=steps_per_epoch,
+        validation_data=validation_generator,
+        validation_steps=validation_steps,
+        epochs=args.epochs,
+    )
     model.save(args.model_out)
 
 if __name__ == '__main__':

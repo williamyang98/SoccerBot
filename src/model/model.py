@@ -1,5 +1,7 @@
-import tensorflow as tf
-import tensorflow.keras as keras
+import keras
+from keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization, Input
+from keras.layers import Conv2D, MaxPooling2D, SeparableConv2D
+
 from .evaluation import calculate_IOU, calculate_loss
 
 class Model:
@@ -11,6 +13,9 @@ class Model:
             batch_size=hyperparams.get('batch_size', 100),
             epochs=hyperparams.get('epochs', 10),
             validation_data=hyperparams.get('validation_data'))
+
+    def fit_generator(self, *args, **kwargs):
+        self.model.fit_generator(*args, **kwargs)
 
     def summary(self):
         self.model.summary()
@@ -35,6 +40,7 @@ class Model:
     
     def build(self, input_shape, output_shape, hyperparams):
         alpha = 0.2
+
         layers = [
             keras.layers.Conv2D(16, kernel_size=(3, 3), strides=1, input_shape=input_shape),
             keras.layers.LeakyReLU(alpha=alpha),
@@ -68,6 +74,7 @@ class Model:
         ]
 
         model = keras.Sequential(layers)
+
         model.compile(
             optimizer=keras.optimizers.Adam(lr=hyperparams.get("learning_rate", 0.0001)),
             loss=calculate_loss,
