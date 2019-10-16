@@ -12,14 +12,12 @@ class BasicSampleGenerator:
         sample = self.create_background()
         create_score(sample, self.config.score_font, (0, 100))        
 
-        created_ball = random.uniform(0, 1) > 0.3
-        if created_ball:
-            bounding_box = create_ball(sample, self.config.ball_image, (0, 360))
+        bounding_box = create_ball(sample, self.config.ball_image, (0, 360))
 
         for _ in range(random.randint(0, 4)):
             sample_type = random.uniform(0, 1)
             if sample_type < 0.3:
-                rect = self.get_streaked_emotes(bounding_box[:2] if created_ball else None)
+                rect = self.get_streaked_emotes(bounding_box[:2])
                 populate_emotes(sample, self.config.emote_images, total=(0, 25), rect=rect)
             elif sample_type < 0.5:
                 rect = self.get_local_scattered_emotes()
@@ -29,12 +27,8 @@ class BasicSampleGenerator:
             else:
                 pass
         
-        if created_ball:
-            label = bounding_box+(1,)
-        else:
-            label = (0, 0, 0, 0, 0)
+        label = bounding_box
 
-        # label = x_centre, y_centre, width, height, confidence
         return (sample, label)
 
     def get_streaked_emotes(self, pos=None, x_offset=0.1, y_offset=0.1, width=0.05, height=0.3):

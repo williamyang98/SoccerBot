@@ -109,6 +109,7 @@ def main():
         model = LiteModel(file.read())
     
     predictor = Predictor(model)
+    predictor.acceleration = 3
 
     while app.is_running:
         if not args.preview and app.is_paused:

@@ -44,9 +44,9 @@ def save_image(image, filepath, size=None):
     image.save(filepath)
 
 def save_label(bounding_box, filepath):
-    x_centre, y_centre, width, height, confidence = bounding_box
+    x_centre, y_centre, width, height = bounding_box
     with open(filepath, "w") as file:
-        file.write("{0} {1} {2} {3} {4}".format(x_centre, y_centre, width, height, confidence))
+        file.write("{0} {1} {2} {3}".format(x_centre, y_centre, width, height))
 
 def get_generator_config(icons_dir):
     config = GeneratorConfig()

@@ -26,7 +26,7 @@ class Model:
             filepath, 
             custom_objects={
                 "calculate_IOU": calculate_IOU,
-                "calculate_loss": calculate_loss
+                "calculate_loss": calculate_loss,
             })
     
     def save(self, filepath):
@@ -63,7 +63,7 @@ class Model:
             keras.layers.LeakyReLU(alpha=alpha),
             keras.layers.Dense(62),
             keras.layers.LeakyReLU(alpha=alpha),
-            keras.layers.Dense(4),
+            keras.layers.Dense(output_shape[0]),
             keras.layers.LeakyReLU(alpha=alpha),
         ]
 
