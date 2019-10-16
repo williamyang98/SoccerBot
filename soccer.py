@@ -122,11 +122,9 @@ def main():
     predictor = Predictor(model)
     predictor.acceleration = 8
 
-    start = default_timer()
-    with mss.mss() as screen:
-        screen.grab(rect)
-    end = default_timer()
-    predictor.screen_shot_delay = end-start
+    screen_shot_delay = get_screen_shot_delay(rect)
+    print("Screen shot delay: {:.02f}ms".format(screen_shot_delay*1000)) 
+    predictor.screen_shot_delay = screen_shot_delay
 
     while app.is_running:
         if not args.preview and app.is_paused:
@@ -150,6 +148,15 @@ def main():
         if check_mouse_inside(rect, (x, y)) and not app.is_paused and not reached_top:
             pyautogui.moveTo(x=x, y=y)
             pyautogui.click(x=x, y=y)
+
+def get_screen_shot_delay(rect):
+    start = default_timer()
+    with mss.mss() as screen:
+        screen.grab(rect)
+    end = default_timer()
+    screen_shot_delay = end-start
+    return screen_shot_delay
+
 
 def check_mouse_inside(rect, pos):
     x, y = pos
