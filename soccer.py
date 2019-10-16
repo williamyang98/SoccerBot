@@ -56,6 +56,7 @@ class Predictor:
         self.last_bounding_box = (0, 0, 0, 0)
         self.last_time = 0
         self.acceleration = 2.5 # normalised
+        self.screen_shot_delay = 0
 
     def predict(self, image, show_preview=False):
         curr_time = default_timer()
@@ -69,12 +70,22 @@ class Predictor:
         x, y, width, height = bounding_box
         last_x, last_y, _, _ = self.last_bounding_box
         # calculate velocity
-        delay = end - curr_time
+        delay = end - curr_time + self.screen_shot_delay
         vx, vy = (x-last_x)/dt, (y-last_y)/dt
         real_x = x +  vx*delay
         real_y = y + vy*delay 
         if vy != 0 and vx != 0:
-            real_y += self.acceleration*0.5*delay**2 # when ball is stationary
+            real_y += self.acceleration*0.5*(delay**2) # when ball is stationary
+
+        # calculate bounce
+        right_border = 1-width/2
+        left_border = width/2
+        if real_x > right_border:
+            delta = real_x-right_border
+            real_x = right_border-delta
+        elif real_x < left_border:
+            delta = left_border-real_x
+            real_x = left_border+delta
 
         real_bounding_box = (real_x, real_y, width, height)
 
@@ -109,7 +120,13 @@ def main():
         model = LiteModel(file.read())
     
     predictor = Predictor(model)
-    predictor.acceleration = 3
+    predictor.acceleration = 8
+
+    start = default_timer()
+    with mss.mss() as screen:
+        screen.grab(rect)
+    end = default_timer()
+    predictor.screen_shot_delay = end-start
 
     while app.is_running:
         if not args.preview and app.is_paused:
@@ -120,13 +137,17 @@ def main():
             image = screen.grab(rect)
 
         image = np.array(image)
+        image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
         bounding_box = predictor.predict(image, show_preview=args.preview)
 
         x, y, _, _ = map_bounding_box(bounding_box, image.shape[:2])
+
+        reached_top = y < 150
+
         x = x + rect['left']
         y = y + rect['top'] 
 
-        if check_mouse_inside(rect, (x, y)) and not app.is_paused:
+        if check_mouse_inside(rect, (x, y)) and not app.is_paused and not reached_top:
             pyautogui.moveTo(x=x, y=y)
             pyautogui.click(x=x, y=y)
 
