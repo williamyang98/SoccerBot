@@ -3,7 +3,7 @@ import os
 import random
 from PIL import Image, ImageDraw, ImageFont
 
-def create_score(canvas, font, score_range):
+def create_score(canvas, font, score_range, fill):
     score = random.randint(*score_range)
     score_text = "{0}".format(score)
     score_width, score_height = font.getsize(score_text) 
@@ -13,7 +13,7 @@ def create_score(canvas, font, score_range):
     y = int(height/5-score_height/2)
 
     draw = ImageDraw.Draw(canvas)
-    draw.text((x, y), score_text, size=50, font=font, fill=(100, 100, 100))
+    draw.text((x, y), score_text, size=50, font=font, fill=fill)
 
 def populate_emotes(canvas, emotes, total, rect=(0, 0, 1, 1)):
     lower, upper = total

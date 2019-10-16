@@ -3,6 +3,9 @@ import random
 
 from .overlays import *
 
+GREY = (100, 100, 100)
+BLUE = (0, 135, 255)
+
 class BasicSampleGenerator:
     def __init__(self, config):
         self.config = config
@@ -10,7 +13,14 @@ class BasicSampleGenerator:
     
     def create_sample(self):
         sample = self.create_background()
-        create_score(sample, self.config.score_font, (0, 100))        
+
+        if random.uniform(0, 1) > 0.5:
+            text_colour = GREY
+        else:
+            text_colour = BLUE
+        
+
+        create_score(sample, self.config.score_font, (0, 100), text_colour)        
 
         bounding_box = create_ball(sample, self.config.ball_image, (0, 360))
 
