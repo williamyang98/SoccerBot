@@ -156,8 +156,8 @@ def main():
         last_y = y
 
         if check_mouse_inside(rect, (x, y)) and not app.is_paused:
-            # if not reached_top and dy >= 0:
-            pyautogui.click(x=x, y=y)
+            if dy >= 0:
+                pyautogui.click(x=x, y=y)
 
         if args.preview:
             draw_bounding_box(image, detected_bounding_box)
