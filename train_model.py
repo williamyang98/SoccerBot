@@ -79,6 +79,8 @@ def main():
         validation_steps=validation_steps,
         epochs=args.epochs,
     )
+
+    os.makedirs(os.path.dirname(args.model_out), exist_ok=True)
     model.save(args.model_out)
 
 if __name__ == '__main__':
