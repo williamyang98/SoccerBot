@@ -65,7 +65,6 @@ class Predictor:
 
         bounding_box = predict_bounding_box(self.model, image, size=(INPUT_SHAPE[1], INPUT_SHAPE[0]))
         end = default_timer()
-        print("\r{:.02f}ms/frame".format(dt*1000), end='')
         
         x, y, width, height = bounding_box
         last_x, last_y, _, _ = self.last_bounding_box
@@ -97,6 +96,7 @@ def main():
     parser.add_argument("--preview", action='store_true')
     parser.add_argument("--model", default="assets/model/model.h5")
     parser.add_argument("--lite", action="store_true")
+    parser.add_argument("--debug", action="store_true")
 
     args = parser.parse_args()
 
@@ -116,14 +116,16 @@ def main():
         model.load(args.model)
 
     predictor = Predictor(model)
-    predictor.acceleration = 8
+    predictor.acceleration = 15 
 
-    screen_shot_delay = get_screen_shot_delay(rect)
-    print("Screen shot delay: {:.02f}ms".format(screen_shot_delay*1000)) 
-    predictor.screen_shot_delay = screen_shot_delay
+    if args.debug:
+        screen_shot_delay = get_screen_shot_delay(rect)
+        print("Screen shot delay: {:.02f}ms".format(screen_shot_delay*1000)) 
+        predictor.screen_shot_delay = screen_shot_delay
 
 
     last_y = 0
+    click_delay = 0.002
 
     while app.is_running:
         if not args.preview and app.is_paused:
@@ -136,15 +138,16 @@ def main():
         image = np.array(image)
         converted_image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
 
-        end = default_timer()
-
-        predictor.screen_shot_delay = end-start
+        predictor.screen_shot_delay = default_timer()-start + click_delay
 
         detected_bounding_box, real_bounding_box = predictor.predict(converted_image)
-
         x, y, _, _ = map_bounding_box(real_bounding_box, image.shape[:2])
 
-        reached_top = y < 120
+        if args.debug:
+            net_dt = default_timer()-start
+            print("\r{:.02f}ms/frame".format(net_dt*1000), end='')
+
+        reached_top = y < 100
 
         x = x + rect['left']
         y = y + rect['top'] 
@@ -152,8 +155,10 @@ def main():
         dy = y-last_y
         last_y = y
 
-        if check_mouse_inside(rect, (x, y)) and not app.is_paused and not reached_top and dy >= 0:
-            pyautogui.click(x=x, y=y)
+        if check_mouse_inside(rect, (x, y)) and not app.is_paused:
+            pyautogui.moveTo(x=x, y=y)
+            if not reached_top:
+                pyautogui.click(x=x, y=y)
 
         if args.preview:
             draw_bounding_box(image, detected_bounding_box)
