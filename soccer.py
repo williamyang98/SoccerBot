@@ -100,7 +100,7 @@ def main():
 
     args = parser.parse_args()
 
-    rect = {'left': 50, 'top': 150, 'width': 500, 'height': 700}
+    rect = {'left': 677, 'top': 289, 'width': 325, 'height': 500}
 
     app = App()
     app.start()
