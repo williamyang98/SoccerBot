@@ -1,15 +1,15 @@
 # Soccer Bot
 A soccer bot that uses a basic CNN to detect the ball and click on it.
-![Main UI]("assets/screenshots/main_ui.jpg")
+![alt text](docs/main_ui.png "Main UI")
 
 ## Instructions
 Execute the following command to align your game window to the correct position. Follow the on screen instructions to exit/resume/pause the bot.
-```python
+```
 python3 soccer.py --preview
 ```
 
 Execute the following command to run without the preview window.
-```python
+```
 python3 soccer.py
 ```
 
