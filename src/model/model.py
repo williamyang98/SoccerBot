@@ -43,29 +43,42 @@ class Model:
         dropout = 0.1
 
         layers = [
-            keras.layers.Conv2D(16, kernel_size=(4, 4), strides=1, input_shape=input_shape),
+            keras.layers.Conv2D(16, kernel_size=(3, 3), strides=1, input_shape=input_shape),
             keras.layers.LeakyReLU(alpha=alpha),
-            keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(3, 3)),
+            # keras.layers.Dropout(dropout),
+            keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
-            keras.layers.Conv2D(16, kernel_size=(4, 4), strides=1),
+            keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
             keras.layers.LeakyReLU(alpha=alpha),
-            keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(3, 3)),
+            # keras.layers.Dropout(dropout),
+            keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
-            keras.layers.Conv2D(16, kernel_size=(4, 4), strides=1),
+            keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
             keras.layers.LeakyReLU(alpha=alpha),
-            keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(3, 3)),
+            # keras.layers.Dropout(dropout),
+            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+            keras.layers.Conv2D(64, kernel_size=(3, 3), strides=1),
+            keras.layers.LeakyReLU(alpha=alpha),
+            # keras.layers.Dropout(dropout),
+            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+            keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
+            keras.layers.LeakyReLU(alpha=alpha),
+            # keras.layers.Dropout(dropout),
+            keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
+            keras.layers.LeakyReLU(alpha=alpha),
+            # keras.layers.Dropout(dropout),
+            keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
             keras.layers.Flatten(),
 
             keras.layers.Dense(120),
             keras.layers.LeakyReLU(alpha=alpha),
-            keras.layers.Dropout(dropout),
+            # keras.layers.Dropout(dropout),
             keras.layers.Dense(62),
             keras.layers.LeakyReLU(alpha=alpha),
-            keras.layers.Dropout(dropout),
+            # keras.layers.Dropout(dropout),
             keras.layers.Dense(output_shape[0]),
             keras.layers.LeakyReLU(alpha=alpha),
         ]
