@@ -24,13 +24,12 @@ python3 soccer.py
 ```
 
 ## Performance
-- Gets 60ms per frame on a FX6300 (Hexacore) @ 4.2GHz
-- Model has an IOU of 0.83 on training data
+- Gets 30ms per frame on a i5-4200u (mobile) 
+- Model has an IOU of 0.89 on training data
 - Model doesn't know when ball has exited the frame and spams emotes
-- Can score up to 1300 (based off a few runs)
+- Can essentially get an infinite score
 
 ## Todo
 - Reduce number of outputs to 2 (x_centre, y_centre)
 - Use a residual network using Keras' functional api
 - Implement a confidence score to detect when ball isn't present on screen
-- Get model to work on even lower end cpu

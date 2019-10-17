@@ -23,6 +23,6 @@ def calculate_IOU(y_target, y_expected):
 def calculate_loss(y_target, y_expected):
     mean_square_error = tf.losses.mean_squared_error(y_target, y_expected)
     IOU = calculate_IOU(y_target, y_expected)
-    loss = mean_square_error * (1-IOU) 
+    loss = mean_square_error + (1-IOU) 
     return loss
 
