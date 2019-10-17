@@ -125,7 +125,7 @@ def main():
 
 
     last_y = 0
-    click_delay = 0.012
+    click_delay = 0.020
 
     while app.is_running:
         if not args.preview and app.is_paused:
