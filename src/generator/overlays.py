@@ -1,10 +1,23 @@
 import numpy as np
+import math
 import os
 import random
 from PIL import Image, ImageDraw, ImageFont
 
-def create_score(canvas, font, score_range, fill):
-    score = random.randint(*score_range)
+def create_light_beam(canvas, position, angle, spread, colour):
+    width, height = canvas.size
+    beam_length = width+height 
+    x, y = position
+    x1, y1 = int(x + beam_length*math.cos(angle+spread)), int(y + beam_length*math.sin(angle+spread))
+    x2, y2 = int(x + beam_length*math.cos(angle-spread)), int(y + beam_length*math.sin(angle-spread))
+
+    draw = ImageDraw.Draw(canvas, "RGBA")
+    draw.polygon([(x, y), (x1, y1), (x2, y2)], fill=colour)
+
+def create_ui(canvas, ui):
+    canvas.paste(ui, (0, 0), ui)
+
+def create_score(canvas, font, score, fill):
     score_text = "{0}".format(score)
     score_width, score_height = font.getsize(score_text) 
     width, height = canvas.size
