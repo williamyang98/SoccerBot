@@ -8,10 +8,10 @@ import glob
 from src.model import Model, LiteModel
 from src.util import *
 
-INPUT_SIZE = (256, 256, 3)
+INPUT_SIZE = (160, 227)
 
 IMAGES_DIR = "assets/data/samples/"
-PREDICTION_DIR = "assets/predictions/"
+PREDICTION_DIR = "assets/data/predictions/"
 MODEL_DIR = "assets/model/"
 
 def main():
@@ -26,7 +26,7 @@ def main():
     # fetch appropriate model
     if not args.lite:
         print("Loading full model: {0}".format(args.model))
-        model = Model(INPUT_SIZE, (4,))
+        model = Model(INPUT_SIZE+(3,), (4,))
         model.load(args.model)
     else:
         print("Loading quantized model: {0}".format(args.model))
@@ -60,7 +60,7 @@ def parse_image(model, input_file):
     image = np.array(image)
 
     start = default_timer()
-    bounding_box = predict_bounding_box(model, image)
+    bounding_box = predict_bounding_box(model, image, (INPUT_SIZE[1], INPUT_SIZE[0]))
     end = default_timer()
 
     draw_bounding_box(image, bounding_box)
