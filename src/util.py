@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # image = numpy array 
-def predict_bounding_box(model, image, size=(256,256)):
+def predict_bounding_box(model, image, size):
     image = image[:,:,:3] / 255
     image = cv2.resize(image, size)
     # only get first 3 channels 
