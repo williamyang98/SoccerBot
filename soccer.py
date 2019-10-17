@@ -116,7 +116,7 @@ def main():
         model.load(args.model)
 
     predictor = Predictor(model)
-    predictor.acceleration = 15 
+    predictor.acceleration = 5 
 
     if args.debug:
         screen_shot_delay = get_screen_shot_delay(rect)
@@ -125,7 +125,7 @@ def main():
 
 
     last_y = 0
-    click_delay = 0.002
+    click_delay = 0.012
 
     while app.is_running:
         if not args.preview and app.is_paused:
@@ -147,7 +147,7 @@ def main():
             net_dt = default_timer()-start
             print("\r{:.02f}ms/frame".format(net_dt*1000), end='')
 
-        reached_top = y < 100
+        reached_top = y < 180
 
         x = x + rect['left']
         y = y + rect['top'] 
@@ -156,9 +156,8 @@ def main():
         last_y = y
 
         if check_mouse_inside(rect, (x, y)) and not app.is_paused:
-            pyautogui.moveTo(x=x, y=y)
-            if not reached_top:
-                pyautogui.click(x=x, y=y)
+            # if not reached_top and dy >= 0:
+            pyautogui.click(x=x, y=y)
 
         if args.preview:
             draw_bounding_box(image, detected_bounding_box)
