@@ -39,12 +39,19 @@ class BasicSampleGenerator:
         create_ui(sample, self.config.background_image)
         create_score(sample, self.config.score_font, score, text_colour)        
 
-        bounding_box = create_ball(sample, self.config.ball_image, (0, 360))
+        created_ball = random.random() > 0.5
+
+        if created_ball:
+            bounding_box = create_ball(sample, self.config.ball_image, (0, 360))
 
         for _ in range(random.randint(0, 4)):
             sample_type = random.uniform(0, 1)
-            if sample_type < 0.3:
-                rect = self.get_streaked_emotes(bounding_box[:2])
+            if sample_type < 0.3 and created_ball:
+                if created_ball:
+                    pos = bounding_box[:2]
+                else:
+                    pos = (random.randint(0, size[0]), random.randint(0, size[1]))
+                rect = self.get_streaked_emotes(pos)
                 populate_emotes(sample, self.config.emote_images, total=(0, 25), rect=rect)
             elif sample_type < 0.5:
                 rect = self.get_local_scattered_emotes()
@@ -54,7 +61,10 @@ class BasicSampleGenerator:
             else:
                 pass
         
-        label = bounding_box
+        if created_ball:
+            label = bounding_box + (1,)
+        else:
+            label = (0, 0, 0, 0, 0) 
 
         return (sample, label)
 
