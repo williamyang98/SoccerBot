@@ -5,7 +5,6 @@ import mss
 import cv2
 from timeit import default_timer
 
-from src.model import LiteModel, Model
 from src.util import *
 
 import argparse
@@ -59,7 +58,7 @@ class Predictor:
         self.acceleration = 2.5 # normalised
         self.screen_shot_delay = 0
 
-    def predict(self, image, show_preview=False):
+    def predict(self, image):
         curr_time = default_timer()
         dt = curr_time-self.last_time
         self.last_time = curr_time
@@ -90,26 +89,14 @@ class Predictor:
 
         real_bounding_box = (real_x, real_y, width, height)
 
-        if show_preview:
-            image = draw_bounding_box(image, bounding_box)
-            image = draw_bounding_box(image, real_bounding_box, (255, 0, 0))
-            self.show_preview(image)
-        
         self.last_bounding_box = bounding_box
-        return real_bounding_box
-
-    
-    def show_preview(self, preview):
-        cv2.imshow("Preview", preview)
-        if cv2.waitKey(25) & 0xFF == ord('q'):
-            cv2.destroyAllWindows()
-
+        return (bounding_box, real_bounding_box)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--preview", action='store_true')
-    parser.add_argument("--model", default="assets/model/quantized-model.tflite")
-    parser.add_argument("--full", action="store_true")
+    parser.add_argument("--model", default="assets/model/model.h5")
+    parser.add_argument("--lite", action="store_true")
 
     args = parser.parse_args()
 
@@ -118,7 +105,10 @@ def main():
     app = App()
     app.start()
 
-    if not args.full:
+
+    from src.model import LiteModel, Model
+
+    if args.lite:
         with open(args.model, "rb") as file:
             model = LiteModel(file.read())
     else:
@@ -144,17 +134,17 @@ def main():
             image = screen.grab(rect)
 
         image = np.array(image)
-        image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
+        converted_image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
 
         end = default_timer()
 
         predictor.screen_shot_delay = end-start
 
-        bounding_box = predictor.predict(image, show_preview=args.preview)
+        detected_bounding_box, real_bounding_box = predictor.predict(converted_image)
 
-        x, y, _, _ = map_bounding_box(bounding_box, image.shape[:2])
+        x, y, _, _ = map_bounding_box(real_bounding_box, image.shape[:2])
 
-        reached_top = y < 150
+        reached_top = y < 120
 
         x = x + rect['left']
         y = y + rect['top'] 
@@ -162,8 +152,14 @@ def main():
         dy = y-last_y
         last_y = y
 
-        if check_mouse_inside(rect, (x, y)) and not app.is_paused and not reached_top and dy >= -40:
+        if check_mouse_inside(rect, (x, y)) and not app.is_paused and not reached_top and dy >= 0:
             pyautogui.click(x=x, y=y)
+
+        if args.preview:
+            draw_bounding_box(image, detected_bounding_box)
+            draw_bounding_box(image, real_bounding_box, (255, 0, 0))
+            show_preview(image)
+
 
 def get_screen_shot_delay(rect):
     start = default_timer()
@@ -182,6 +178,11 @@ def check_mouse_inside(rect, pos):
         return False
     return True
 
+
+def show_preview(preview):
+    cv2.imshow("Preview", preview)
+    if cv2.waitKey(25) & 0xFF == ord('q'):
+        cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
