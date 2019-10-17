@@ -2,12 +2,12 @@ import cv2
 import numpy as np
 
 # image = numpy array 
-def predict_bounding_box(model, image, size):
+def get_label_from_image(model, image, size):
     image = image[:,:,:3] / 255
     image = cv2.resize(image, size)
     # only get first 3 channels 
-    bounding_box = model.predict(np.asarray([image]))[0] 
-    return bounding_box
+    label = model.predict(np.asarray([image]))[0] 
+    return label
 
 def map_bounding_box(bounding_box, shape):
     real_height, real_width = shape 

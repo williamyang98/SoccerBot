@@ -13,6 +13,7 @@ pyautogui.FAILSAFE = True
 pyautogui.PAUSE = 0
 
 INPUT_SHAPE = (160,227,3)
+OUTPUT_SHAPE = 5
 
 class App:
     def __init__(self):
@@ -63,9 +64,12 @@ class Predictor:
         dt = curr_time-self.last_time
         self.last_time = curr_time
 
-        bounding_box = predict_bounding_box(self.model, image, size=(INPUT_SHAPE[1], INPUT_SHAPE[0]))
+        label = get_label_from_image(self.model, image, size=(INPUT_SHAPE[1], INPUT_SHAPE[0]))
+
         end = default_timer()
-        
+
+        bounding_box = label[:4]
+        # confidence = label[4] 
         x, y, width, height = bounding_box
         last_x, last_y, _, _ = self.last_bounding_box
         # calculate velocity
@@ -112,7 +116,7 @@ def main():
         with open(args.model, "rb") as file:
             model = LiteModel(file.read())
     else:
-        model = Model(INPUT_SHAPE, (4,))
+        model = Model(INPUT_SHAPE, (OUTPUT_SHAPE,))
         model.load(args.model)
 
     predictor = Predictor(model)

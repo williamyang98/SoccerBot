@@ -2,7 +2,7 @@ import keras
 from keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization, Input
 from keras.layers import Conv2D, MaxPooling2D, SeparableConv2D
 
-from .evaluation import calculate_IOU, calculate_loss
+from .evaluation import calculate_IOU, calculate_loss, calculate_confidence_error
 
 class Model:
     def __init__(self, input_shape, output_shape, hyperparams={}):
@@ -32,6 +32,7 @@ class Model:
             custom_objects={
                 "calculate_IOU": calculate_IOU,
                 "calculate_loss": calculate_loss,
+                "calculate_confidence_error": calculate_confidence_error
             })
     
     def save(self, filepath):
@@ -40,18 +41,22 @@ class Model:
     
     def build(self, input_shape, output_shape, hyperparams):
         alpha = 0.2
+        dropout = 0.1
 
         layers = [
             keras.layers.Conv2D(16, kernel_size=(3, 3), strides=1, input_shape=input_shape),
             keras.layers.LeakyReLU(alpha=alpha),
+            keras.layers.Dropout(dropout),
             keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
             keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
             keras.layers.LeakyReLU(alpha=alpha),
+            keras.layers.Dropout(dropout),
             keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
             keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
             keras.layers.LeakyReLU(alpha=alpha),
+            keras.layers.Dropout(dropout),
             keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
             #keras.layers.Conv2D(128, kernel_size=(3, 3),  strides=1),
@@ -67,8 +72,10 @@ class Model:
             #keras.layers.Dense(480g),
             keras.layers.Dense(120),
             keras.layers.LeakyReLU(alpha=alpha),
+            keras.layers.Dropout(dropout),
             keras.layers.Dense(62),
             keras.layers.LeakyReLU(alpha=alpha),
+            keras.layers.Dropout(dropout),
             keras.layers.Dense(output_shape[0]),
             keras.layers.LeakyReLU(alpha=alpha),
         ]
@@ -78,6 +85,6 @@ class Model:
         model.compile(
             optimizer=keras.optimizers.Adam(lr=hyperparams.get("learning_rate", 0.0001)),
             loss=calculate_loss,
-            metrics=hyperparams.get("metrics", [calculate_IOU, "accuracy"])
+            metrics=hyperparams.get("metrics", [calculate_IOU, calculate_confidence_error, "accuracy"])
         )
         return model

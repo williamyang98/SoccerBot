@@ -15,6 +15,7 @@ LABELS_FILE = os.path.join(DATA_DIR, "labels.txt")
 IMAGES_DIR = os.path.join(DATA_DIR, "samples")
 
 TARGET_SIZE = (160, 227)
+OUTPUT_SIZE = 5
 
 def main():
     parser = argparse.ArgumentParser()
@@ -32,12 +33,14 @@ def main():
 
     image_gen = ImageDataGenerator(validation_split=args.ratio, rescale=1.0/255.0)
     dataframe = pd.read_csv(args.labels, delim_whitespace=True)
+    label_names = ["x_centre", "y_centre", "width", "height", "confidence"]
+
 
     training_generator = image_gen.flow_from_dataframe(
         dataframe=dataframe,
         directory=args.images_dir,
         x_col="filename",
-        y_col=["x_centre", "y_centre", "width", "height"],
+        y_col=label_names,
         subset="training",
         batch_size=args.batch_size,
         class_mode="raw",
@@ -47,7 +50,7 @@ def main():
         dataframe=dataframe,
         directory=args.images_dir,
         x_col="filename",
-        y_col=["x_centre", "y_centre", "width", "height"],
+        y_col=label_names,
         subset="validation",
         batch_size=args.batch_size,
         class_mode="raw",
@@ -57,7 +60,7 @@ def main():
         'learning_rate': args.learning_rate,
     }
 
-    model = Model(TARGET_SIZE+(3,), (4,), hyperparams)
+    model = Model(TARGET_SIZE+(3,), (OUTPUT_SIZE,), hyperparams)
 
     try:
         model.load(args.model_in)
