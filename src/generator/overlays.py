@@ -75,8 +75,8 @@ def create_ball(canvas, ball, rotation_range):
     background_width, background_height = canvas.size
     ball_width, ball_height = ball.size
 
-    x = random.randint(0, background_width)
-    y = random.randint(0, background_height)
+    x = random.randint(0, background_width-ball_width)
+    y = random.randint(int(-ball_height/2), int(background_height-ball_height/2))
     rotation = random.randint(rotation_range[0], rotation_range[1])
 
     canvas.paste(ball.rotate(rotation), (x, y), ball)
