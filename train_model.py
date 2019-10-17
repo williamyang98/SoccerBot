@@ -26,10 +26,11 @@ def main():
     parser.add_argument("--learning-rate", type=float, default=0.0001)
     parser.add_argument("--batch-size", type=int, default=100)
     parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--ratio", type=float, default=0.15)
 
     args = parser.parse_args()
 
-    image_gen = ImageDataGenerator(validation_split=0.2, rescale=1.0/255.0)
+    image_gen = ImageDataGenerator(validation_split=args.ratio, rescale=1.0/255.0)
     dataframe = pd.read_csv(args.labels, delim_whitespace=True)
 
     training_generator = image_gen.flow_from_dataframe(
