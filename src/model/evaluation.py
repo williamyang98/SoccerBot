@@ -18,7 +18,7 @@ def calculate_IOU(y_target, y_expected):
     intersect_area = K.maximum(0.0, right-left)*K.maximum(0.0, bottom-top)
     union_area = (a_width*a_height) + (b_width*b_height) - intersect_area
     IOU = (intersect_area/union_area)
-    result = IOU*tf.cast(y_expected[...,4] > 0.5, tf.float32) + union_area*tf.cast(y_expected[...,4] <= 0.5, tf.float32)
+    result = IOU*tf.cast(y_expected[...,4] > 0.5, tf.float32) + 1.0*tf.cast(y_expected[...,4] <= 0.5, tf.float32)
     return result
 
 def calculate_confidence_error(y_target, y_expected):
@@ -29,7 +29,6 @@ def calculate_confidence_error(y_target, y_expected):
 def calculate_loss(y_target, y_expected):
     mean_square_error = tf.losses.mean_squared_error(y_target, y_expected)
     IOU = calculate_IOU(y_target, y_expected)
-    confidence_error = calculate_confidence_error(y_target, y_expected)
     loss = mean_square_error + (1-IOU)
     return loss
     # return mean_square_error
