@@ -100,7 +100,7 @@ def main():
 
     args = parser.parse_args()
 
-    rect = {'left': 677, 'top': 289, 'width': 325, 'height': 500}
+    rect = {'left': 50, 'top': 150, 'width': 500, 'height': 700}
 
     app = App()
     app.start()
@@ -147,7 +147,7 @@ def main():
             net_dt = default_timer()-start
             print("\r{:.02f}ms/frame".format(net_dt*1000), end='')
 
-        reached_top = y < 180
+        reached_top = y < rect['height'] * 0.30
 
         x = x + rect['left']
         y = y + rect['top'] 
