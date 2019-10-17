@@ -14,6 +14,33 @@ def create_light_beam(canvas, position, angle, spread, colour):
     draw = ImageDraw.Draw(canvas, "RGBA")
     draw.polygon([(x, y), (x1, y1), (x2, y2)], fill=colour)
 
+def create_firework(canvas, pos, explosion_size, colour, streak_size=3, total_lines=12, collapse_chance=0.7):
+    draw = ImageDraw.Draw(canvas, "RGBA")
+    
+    explosion_collapsed = random.random() < collapse_chance
+
+    x, y = pos
+    delta = 2*math.pi/total_lines
+    angle = 0
+    
+    if not explosion_collapsed:
+        fire_radius = random.randint(0, int(explosion_size/2))
+        draw.ellipse([(x-fire_radius, y-fire_radius), (x+fire_radius, y+fire_radius)], fill=colour)
+        return
+
+    fire_radius = random.randint(0, int(explosion_size/3))
+    start_radius = explosion_size/2-fire_radius
+    streak_length = explosion_size-fire_radius
+    end_radius = start_radius+streak_length
+    if fire_radius > explosion_size/10:
+        draw.ellipse([(x-fire_radius, y-fire_radius), (x+fire_radius, y+fire_radius)], fill=colour)
+
+    for _ in range(total_lines):
+        x1, y1 = int(x + start_radius*math.cos(angle)), int(y + start_radius*math.sin(angle))
+        x2, y2 = int(x + end_radius*math.cos(angle)), int(y + end_radius*math.sin(angle))
+        draw.line([(x1,y1), (x2,y2)], fill=colour, width=streak_size)
+        angle += delta
+
 def create_ui(canvas, ui):
     canvas.paste(ui, (0, 0), ui)
 

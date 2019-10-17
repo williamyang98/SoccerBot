@@ -8,6 +8,12 @@ GREY = (100, 100, 100)
 BLUE = (0, 135, 255)
 YELLOW = (255, 241, 192, 10)
 
+FIREWORK_COLOURS = [
+    (155, 225, 146),
+    (255, 149, 234),
+    (252, 214, 81)
+]
+
 class BasicSampleGenerator:
     def __init__(self, config):
         self.config = config
@@ -17,7 +23,7 @@ class BasicSampleGenerator:
     def create_sample(self):
         size = self.config.background_image.size
         sample = self.create_background(size)
-        score = random.randint(0, 100)
+        score = random.randint(0, 60)
 
         if random.uniform(0, 1) > 0.5:
             text_colour = GREY
@@ -25,15 +31,10 @@ class BasicSampleGenerator:
             text_colour = BLUE
         
         if score > 10:
-            total_light_beams = random.randint(0, self.params.get("total_light_beams", 5))
-            spread = math.pi/100
-            y = size[1] - 10 
+            self.create_light_beams(sample)
 
-            for _ in range(total_light_beams):
-                left = random.random() > 0.5
-                x = -100 if left else size[0]+100
-                angle = random.uniform(-math.pi/2, 0) if left else random.uniform(-math.pi, -math.pi/2)
-                create_light_beam(sample, (x, y), angle, spread, YELLOW)
+        if score > 30:
+            self.create_fireworks(sample)
 
         create_ui(sample, self.config.background_image)
         create_score(sample, self.config.score_font, score, text_colour)        
@@ -56,6 +57,33 @@ class BasicSampleGenerator:
         label = bounding_box
 
         return (sample, label)
+
+    def create_light_beams(self, sample, x_offset=100, max_light_beams=5):
+        width, height = sample.size
+
+        total_light_beams = random.randint(1, max_light_beams)
+
+        spread = math.pi/100
+        y = height - 10 
+
+        for _ in range(total_light_beams):
+            left = random.random() > 0.5
+            x = -x_offset if left else width+x_offset
+            angle = random.uniform(-math.pi/2, 0) if left else random.uniform(-math.pi, -math.pi/2)
+            create_light_beam(sample, (x, y), angle, spread, YELLOW)
+
+
+    def create_fireworks(self, sample, max_fireworks=5, colours=FIREWORK_COLOURS):
+        width, height = sample.size
+
+        total_fireworks = random.randint(1, max_fireworks)
+
+        for _ in range(total_fireworks):
+            explosion_size = random.randint(20, 40)
+            colour = random.choice(colours)
+            x, y = random.randint(explosion_size, width-explosion_size), random.randint(0, int(0.8*height))
+            create_firework(sample, (x, y), explosion_size, colour)
+
 
     def get_streaked_emotes(self, pos=None, x_offset=0.1, y_offset=0.1, width=0.05, height=0.3):
         if pos is None:
