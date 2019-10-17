@@ -51,11 +51,12 @@ def generate_images(output_dir, total_samples, generator, extension):
 def save_image(image, filepath, size=None):
     if size:
         image = image.resize(size)
-    image.save(filepath)
+    rgb_image = image.convert("RGB")
+    rgb_image.save(filepath)
 
 def get_generator_config(icons_dir):
     config = GeneratorConfig()
-    config.set_background_image(os.path.join(icons_dir, "blank.bmp"))
+    config.set_background_image(os.path.join(icons_dir, "blank.png"))
     config.set_ball_image(os.path.join(icons_dir, "ball.png"))
     # get emotes
     emote_filepaths = glob.glob(os.path.join(icons_dir, "success*.png"))

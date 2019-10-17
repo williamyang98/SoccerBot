@@ -5,7 +5,7 @@ import mss
 import cv2
 from timeit import default_timer
 
-from src.model.lite_model import LiteModel
+from src.model import LiteModel, Model
 from src.util import *
 
 import argparse
@@ -13,6 +13,7 @@ import argparse
 pyautogui.FAILSAFE = True
 pyautogui.PAUSE = 0
 
+INPUT_SHAPE = (160,227,3)
 
 class App:
     def __init__(self):
@@ -63,7 +64,7 @@ class Predictor:
         dt = curr_time-self.last_time
         self.last_time = curr_time
 
-        bounding_box = predict_bounding_box(self.model, image)
+        bounding_box = predict_bounding_box(self.model, image, size=(INPUT_SHAPE[1], INPUT_SHAPE[0]))
         end = default_timer()
         print("\r{:.02f}ms/frame".format(dt*1000), end='')
         
@@ -108,6 +109,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--preview", action='store_true')
     parser.add_argument("--model", default="assets/model/quantized-model.tflite")
+    parser.add_argument("--full", action="store_true")
 
     args = parser.parse_args()
 
@@ -116,9 +118,13 @@ def main():
     app = App()
     app.start()
 
-    with open(args.model, "rb") as file:
-        model = LiteModel(file.read())
-    
+    if not args.full:
+        with open(args.model, "rb") as file:
+            model = LiteModel(file.read())
+    else:
+        model = Model(INPUT_SHAPE, (4,))
+        model.load(args.model)
+
     predictor = Predictor(model)
     predictor.acceleration = 8
 
@@ -126,16 +132,24 @@ def main():
     print("Screen shot delay: {:.02f}ms".format(screen_shot_delay*1000)) 
     predictor.screen_shot_delay = screen_shot_delay
 
+
+    last_y = 0
+
     while app.is_running:
         if not args.preview and app.is_paused:
             continue
-        
+
         start = default_timer()
         with mss.mss() as screen:
             image = screen.grab(rect)
 
         image = np.array(image)
         image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
+
+        end = default_timer()
+
+        predictor.screen_shot_delay = end-start
+
         bounding_box = predictor.predict(image, show_preview=args.preview)
 
         x, y, _, _ = map_bounding_box(bounding_box, image.shape[:2])
@@ -145,8 +159,10 @@ def main():
         x = x + rect['left']
         y = y + rect['top'] 
 
-        if check_mouse_inside(rect, (x, y)) and not app.is_paused and not reached_top:
-            pyautogui.moveTo(x=x, y=y)
+        dy = y-last_y
+        last_y = y
+
+        if check_mouse_inside(rect, (x, y)) and not app.is_paused and not reached_top and dy >= -40:
             pyautogui.click(x=x, y=y)
 
 def get_screen_shot_delay(rect):
