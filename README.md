@@ -27,7 +27,7 @@ python3 soccer.py
 - Gets 60ms per frame on a FX6300 (Hexacore) @ 4.2GHz
 - Model has an IOU of 0.83 on training data
 - Model doesn't know when ball has exited the frame and spams emotes
-- Can score up to 450 (based off a few runs)
+- Can score up to 1300 (based off a few runs)
 
 ## Todo
 - Reduce number of outputs to 2 (x_centre, y_centre)
