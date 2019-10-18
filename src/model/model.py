@@ -46,45 +46,37 @@ class Model:
         inputs = Input(shape=input_shape)
 
         x = Conv2D(16, (3, 3))(inputs)
-        # x = BatchNormalization()(x)
         x = LeakyReLU(alpha)(x)
         x = MaxPooling2D((2, 2))(x)
 
-        x = SeparableConv2D(32, (3, 3), padding="same")(x)
-        # x = keras.layers.add([y, x])
-        # x = BatchNormalization()(x)
+        x = SeparableConv2D(32, (3, 3))(x)
         x = LeakyReLU(alpha)(x)
         x = MaxPooling2D((2, 2))(x)
 
-        x = Conv2D(32, (3, 3), padding="same")(x)
-        # y = LeakyReLU(alpha)(y)
-        # x = keras.layers.add([y, x])
-        # x = BatchNormalization()(x)
+        x = Conv2D(32, (3, 3))(x)
         x = LeakyReLU(alpha)(x)
         x = MaxPooling2D((2, 2))(x)
 
-        x = SeparableConv2D(64, (3, 3), padding="same")(x)
-        # x = keras.layers.add([y, x])
-        # x = BatchNormalization()(x)
+        x = SeparableConv2D(64, (3, 3))(x)
         x = LeakyReLU(alpha)(x)
         x = MaxPooling2D((2, 2))(x)
 
-        x = Conv2D(64, (3, 3), padding="same")(x)
-        # x = keras.layers.add([y, x])
-        # x = BatchNormalization()(x)
+        x = Conv2D(64, (3, 3))(x)
         x = LeakyReLU(alpha)(x)
         x = MaxPooling2D((2, 2))(x)
 
         x = SeparableConv2D(128, (3, 3), padding="same")(x)
-        # x = keras.layers.add([y, x])
-        # x = BatchNormalization()(x)
         x = LeakyReLU(alpha)(x)
         x = MaxPooling2D((2, 2))(x)
 
         x = Flatten()(x)
 
+        x = Dense(128)(x)
+        x = LeakyReLU(alpha)(x)
+
         x = Dense(64)(x)
         x = LeakyReLU(alpha)(x)
+
         x = Dense(output_shape[0])(x)
         outputs = LeakyReLU(alpha)(x)
 
