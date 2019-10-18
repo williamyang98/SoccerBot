@@ -24,8 +24,8 @@ python3 soccer.py
 ```
 
 ## Performance
-- Gets 30ms per frame on a i5-4200u (mobile) 
-- Model has an IOU of 0.89 on training data
+- Gets 30ms per frame on a i5-7200u (mobile) 
+- Model has an IOU of 0.93 on training data
 - Model doesn't know when ball has exited the frame and spams emotes
 - Can essentially get an infinite score
 
