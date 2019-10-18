@@ -1,6 +1,7 @@
 import keras
 from keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization, Input
 from keras.layers import Conv2D, MaxPooling2D, SeparableConv2D
+from keras.layers import LeakyReLU
 
 from .evaluation import calculate_IOU, calculate_loss
 
@@ -42,49 +43,40 @@ class Model:
         alpha = 0.2
         dropout = 0.1
 
-        layers = [
-            keras.layers.Conv2D(16, kernel_size=(3, 3), strides=1, input_shape=input_shape),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        inputs = Input(shape=input_shape)
 
-            keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        x = SeparableConv2D(32, (3, 3))(inputs)
+        x = BatchNormalization()(x)
+        x = LeakyReLU(alpha)(x)
+        x = MaxPooling2D((2, 2))(x)
 
-            keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        y = SeparableConv2D(32, (3, 3), padding="same")(x)
+        x = keras.layers.add([y, x])
+        x = BatchNormalization()(x)
+        x = LeakyReLU(alpha)(x)
+        x = MaxPooling2D((2, 2))(x)
 
-            keras.layers.Conv2D(64, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        y = SeparableConv2D(32, (3, 3), padding="same")(x)
+        y = LeakyReLU(alpha)(y)
+        x = keras.layers.add([y, x])
+        x = BatchNormalization()(x)
+        x = LeakyReLU(alpha)(x)
+        x = MaxPooling2D((2, 2))(x)
 
-            keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        y = SeparableConv2D(32, (3, 3), padding="same")(x)
+        x = keras.layers.add([y, x])
+        x = BatchNormalization()(x)
+        x = LeakyReLU(alpha)(x)
+        x = MaxPooling2D((2, 2))(x)
 
-            keras.layers.Flatten(),
+        x = Flatten()(x)
 
-            keras.layers.Dense(120),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.Dense(62),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.Dense(output_shape[0]),
-            keras.layers.LeakyReLU(alpha=alpha),
-        ]
+        x = Dense(64)(x)
+        x = LeakyReLU(alpha)(x)
+        x = Dense(output_shape[0])(x)
+        outputs = LeakyReLU(alpha)(x)
 
-        model = keras.Sequential(layers)
-
+        model = keras.Model(inputs=inputs, outputs=outputs)
         model.compile(
             optimizer=keras.optimizers.Adam(lr=hyperparams.get("learning_rate", 0.0001)),
             loss=calculate_loss,
