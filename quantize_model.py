@@ -14,8 +14,7 @@ def main():
     args = parser.parse_args()
 
     # create using weights
-    model = Model((256,256,3), (5,))
-    model.load(args.model_in)
+    model = Model.load(args.model_in)
 
     # quantize and store as bytefile
     quantized_model = convert(model.model)

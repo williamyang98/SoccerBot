@@ -26,8 +26,7 @@ def main():
     # fetch appropriate model
     if not args.lite:
         print("Loading full model: {0}".format(args.model))
-        model = Model(INPUT_SIZE+(3,), (4,))
-        model.load(args.model)
+        model = Model.load(args.model)
     else:
         print("Loading quantized model: {0}".format(args.model))
         with open(args.model, 'rb') as file:

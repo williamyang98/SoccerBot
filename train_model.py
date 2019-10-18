@@ -57,12 +57,12 @@ def main():
         'learning_rate': args.learning_rate,
     }
 
-    model = Model(TARGET_SIZE+(3,), (4,), hyperparams)
 
     try:
-        model.load(args.model_in)
+        model = Model.load(args.model_in)
     except IOError:
         print("Unable to load model: {0}".format(args.model_in))
+        model = Model.build(TARGET_SIZE+(3,), (4,), hyperparams)
 
     model.summary()
 

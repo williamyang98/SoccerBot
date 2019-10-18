@@ -46,9 +46,11 @@ class App:
         self.listener.stop()
 
     def display_controls(self):
-        print("\t F1 = Resume")
-        print("\t F2 = Pause")
-        print("\t F3 = Exit")
+        print("== Controls ==")
+        print("F1 : Resume")
+        print("F2 : Pause")
+        print("F3 : Exit")
+        print("==============")
 
 class Predictor:
     def __init__(self, model):
@@ -112,8 +114,7 @@ def main():
         with open(args.model, "rb") as file:
             model = LiteModel(file.read())
     else:
-        model = Model(INPUT_SHAPE, (4,))
-        model.load(args.model)
+        model = Model.load(args.model)
 
     predictor = Predictor(model)
     predictor.acceleration = 5 
@@ -127,6 +128,7 @@ def main():
     last_y = 0
     click_delay = 0.020
 
+    print("[Bot ready]")
     while app.is_running:
         if not args.preview and app.is_paused:
             continue
@@ -156,6 +158,7 @@ def main():
         last_y = y
 
         if check_mouse_inside(rect, (x, y)) and not app.is_paused:
+            # if dy >= 0 and not reached_top:
             if dy >= 0:
                 pyautogui.click(x=x, y=y)
 

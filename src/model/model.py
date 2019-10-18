@@ -6,40 +6,18 @@ from keras.layers import LeakyReLU
 from .evaluation import calculate_IOU, calculate_loss
 
 class Model:
-    def __init__(self, input_shape, output_shape, hyperparams={}):
-        self.model = self.build(input_shape, output_shape, hyperparams)
-    
-    def fit(self, X, Y, hyperparams):
-        self.model.fit(X, Y,
-            batch_size=hyperparams.get('batch_size', 100),
-            epochs=hyperparams.get('epochs', 10),
-            validation_data=hyperparams.get('validation_data'))
-
-    def fit_generator(self, *args, **kwargs):
-        self.model.fit_generator(*args, **kwargs)
-
-    def summary(self):
-        self.model.summary()
-    
-    def evaluate(self, X, Y):
-        return self.model.evaluate(X, Y)
-
-    def predict(self, X):
-        return self.model.predict(X)
-
-    def load(self, filepath):
-        self.model = keras.models.load_model(
+    @staticmethod
+    def load(filepath):
+        model = keras.models.load_model(
             filepath, 
             custom_objects={
                 "calculate_IOU": calculate_IOU,
                 "calculate_loss": calculate_loss,
             })
+        return model
     
-    def save(self, filepath):
-        self.model.save(filepath)
-    
-    
-    def build(self, input_shape, output_shape, hyperparams):
+    @staticmethod 
+    def build(input_shape, output_shape, hyperparams):
         alpha = 0.2
         dropout = 0.1
 
