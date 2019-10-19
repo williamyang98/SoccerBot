@@ -17,7 +17,7 @@ def main():
     model = Model.load(args.model_in)
 
     # quantize and store as bytefile
-    quantized_model = convert(model.model)
+    quantized_model = convert(model)
     with open(args.model_out, 'wb+') as file:
         file.write(quantized_model)
 
