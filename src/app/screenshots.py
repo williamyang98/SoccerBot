@@ -23,5 +23,5 @@ class MSSScreenshot:
         image = self.screen.grab(self.monitor)
         image = np.array(image)
         # convert from bgra to rgb
-        image = image[:,:,:3][:,:,::-1]
+        image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
         return image
