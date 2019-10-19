@@ -170,8 +170,10 @@ class App:
         return True
 
     def start_preview_thread(self):
+        window_name = "Preview"
         while self.is_running:
             if not self.show_preview:
+                cv2.destroyWindow(window_name)
                 time.sleep(0.03)
                 continue
 
@@ -186,7 +188,7 @@ class App:
             draw_bounding_box(image, detected_bounding_box)
             draw_bounding_box(image, real_bounding_box, (255, 0, 0))
             # display
-            cv2.imshow("Preview", cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+            cv2.imshow(window_name, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
             if cv2.waitKey(100) & 0xFF == ord('q'):
                 cv2.destroyAllWindows()
 
