@@ -39,7 +39,7 @@ def main():
         model = Model.load(args.model)
 
     predictor = Predictor(model, INPUT_SHAPE)
-    predictor.acceleration = 5 
+    predictor.acceleration = 5
 
     # screenshotter = D3DScreenshot(screen_bounding_box)
     screenshotter = MSSScreenshot(screen_bounding_box)
@@ -94,7 +94,7 @@ def check_mouse_inside(screen_bounding_box, pos):
     return True
 
 def show_preview(preview):
-    cv2.imshow("Preview", preview)
+    cv2.imshow("Preview", cv2.cvtColor(preview, cv2.COLOR_RGB2BGR))
     if cv2.waitKey(25) & 0xFF == ord('q'):
         cv2.destroyAllWindows()
 
