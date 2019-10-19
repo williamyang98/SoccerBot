@@ -25,7 +25,7 @@ def main():
 
     # screen box is (x, y, width, height)
     screen_bounding_box = (677, 289, 325, 500)
-    screen_x, screen_y, screen_height, screen_width = screen_bounding_box
+    screen_x, screen_y, screen_width, screen_height = screen_bounding_box
 
     app = App()
     app.start()
@@ -38,7 +38,7 @@ def main():
     else:
         model = Model.load(args.model)
 
-    predictor = Predictor(model)
+    predictor = Predictor(model, INPUT_SHAPE)
     predictor.acceleration = 5 
 
     # screenshotter = D3DScreenshot(screen_bounding_box)
@@ -66,7 +66,7 @@ def main():
             net_dt = default_timer()-start
             print("\r{:.02f}ms/frame".format(net_dt*1000), end='')
 
-        reached_top = y < screen_height * 0.30
+        reached_top = y < (screen_height * 0.30)
 
         x = x + screen_x
         y = y + screen_y
@@ -85,7 +85,7 @@ def main():
             show_preview(image)
 
 def check_mouse_inside(screen_bounding_box, pos):
-    screen_x, screen_y, screen_height, screen_width = screen_bounding_box
+    screen_x, screen_y, screen_width, screen_height = screen_bounding_box
     x, y = pos
     if x <= screen_x or x >= screen_x+screen_width:
         return False
