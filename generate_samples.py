@@ -36,8 +36,8 @@ def main():
 
         labels = generate_samples(args.images_dir, args.total_samples, generator, args.image_ext, args.override)        
         try:
-            for label in labels:
-                file.write(" ".join(map(str, label))+"\n")
+            for filename, bounding_box, has_ball in labels:
+                file.write(f"{filename} {' '.join(map(str, bounding_box))} {has_ball}\n")
         except KeyboardInterrupt:
             pass
 
@@ -55,15 +55,20 @@ def generate_samples(output_dir, total_samples, generator, extension, override):
                 filename = "sample_{0}.{1}".format(counter, extension)
                 image_filepath = os.path.join(output_dir, filename)
 
-        image, label = generator.create_sample()
+        image, bounding_box, has_ball = generator.create_sample()
+
+        width, height = image.size
+        # width, height = int(width*zoom), int(height*zoom)
+
+        # save_image(image, image_filepath, size=(width,height))
         save_image(image, image_filepath)
+
         counter += 1
 
         if (i+1) % 10 == 0:
             print('\r{0}/{1} => {2}'.format(i+1, total_samples, filename), end='')
 
-        label = (filename,) + label
-        yield label
+        yield (filename, bounding_box, has_ball)
 
 def save_image(image, filepath, size=None):
     if size:
