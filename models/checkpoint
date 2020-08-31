@@ -1,0 +1,2 @@
+model_checkpoint_path: "cnn_113_80.h5f"
+all_model_checkpoint_paths: "cnn_113_80.h5f"
