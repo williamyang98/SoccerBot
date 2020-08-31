@@ -28,7 +28,8 @@ def main():
 
     # screen box is (x, y, width, height)
     app = App(args.debug, args.preview)
-    app.bounding_box = (677, 289, 325, 500)
+    # app.bounding_box = (677, 289, 325, 500)
+    app.bounding_box = (677, 289, 400, 550)
 
     predictor = Predictor(model, (HEIGHT, WIDTH))
     predictor.acceleration = 5
@@ -76,8 +77,10 @@ class App:
 
         last_y = 0
         last_frame_time = 0
-        click_delay = 0.020
+        click_delay = 10e-3
         preview_delay = 0
+
+        predictor.acceleration = 2.5
 
         while self.is_running:
             if not self.show_preview and self.is_paused:
@@ -108,7 +111,7 @@ class App:
                 print("\r{:.02f}ms/frame @ {:.02f}fps".format(overall_time*1000, 1/overall_time), end='')
 
             if prediction:
-                reached_top = y < (screen_height * 0.30)
+                reached_top = y < (screen_height * 0.40)
 
                 x = x + screen_x
                 y = y + screen_y
@@ -117,12 +120,15 @@ class App:
                 last_y = y
 
                 if self.check_mouse_inside(self.bounding_box, (x, y)) and not self.is_paused:
-                    # if dy >= 0 and not reached_top:
-                    if dy >= 0:
+                    if dy >= 0 and not reached_top or dy <= -70:
+                    # if dy >= 0:
+                    # if True:
                         if self.track_only:
                             pyautogui.moveTo(x=x, y=y)
                         else:
                             pyautogui.click(x=x, y=y)
+                    else:
+                        pyautogui.moveTo(x=x, y=y)
             
             if self.show_preview:
                 start = default_timer()

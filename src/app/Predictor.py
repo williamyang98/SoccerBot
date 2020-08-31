@@ -15,6 +15,9 @@ class Predictor:
 
         self.confidence_threshold = 0.5
 
+        self.max_lost_frames = 2
+        self.total_lost_frames = 0
+
     def predict(self, image):
         curr_time = default_timer()
         dt = curr_time-self.last_time
@@ -23,10 +26,22 @@ class Predictor:
         end = default_timer()
 
         if confidence < self.confidence_threshold:
+            self.total_lost_frames += 1
+            if self.total_lost_frames >= self.max_lost_frames:
+                self.last_bounding_box = None
             return None
+        else:
+            self.total_lost_frames = 0
+
+        
+        
 
         bounding_box = (x_pos, y_pos, 0.27, 0.18)
         x, y, width, height = bounding_box
+
+        if self.last_bounding_box is None:
+            self.last_bounding_box = bounding_box
+
         last_x, last_y, _, _ = self.last_bounding_box
         # calculate velocity
         delay = end - curr_time + self.additional_delay
