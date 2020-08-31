@@ -13,14 +13,19 @@ class Predictor:
         self.acceleration = 2.5 
         self.additional_delay = 0
 
+        self.confidence_threshold = 0.5
+
     def predict(self, image):
         curr_time = default_timer()
         dt = curr_time-self.last_time
         self.last_time = curr_time
-
-        bounding_box = predict_bounding_box(self.model, image, size=self.input_size[:2][::-1])
+        x_pos, y_pos, confidence = predict_bounding_box(self.model, image, size=self.input_size[:2][::-1])
         end = default_timer()
-        
+
+        if confidence < self.confidence_threshold:
+            return None
+
+        bounding_box = (x_pos, y_pos, 0.27, 0.18)
         x, y, width, height = bounding_box
         last_x, last_y, _, _ = self.last_bounding_box
         # calculate velocity

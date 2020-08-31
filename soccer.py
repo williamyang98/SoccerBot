@@ -14,32 +14,23 @@ from src.app import *
 pyautogui.FAILSAFE = True
 pyautogui.PAUSE = 0
 
-INPUT_SHAPE = (160, 227)
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--preview", action='store_true')
-    parser.add_argument("--model", default="assets/model/model.h5")
-    parser.add_argument("--lite", action="store_true")
+    parser.add_argument("--model", default="assets/models/.h5")
+    parser.add_argument("--large", action="store_true")
     parser.add_argument("--debug", action="store_true")
 
     args = parser.parse_args()
 
-    
-
-    from src.model import LiteModel, Model
-
-    if args.lite:
-        with open(args.model, "rb") as file:
-            model = LiteModel(file.read())
-    else:
-        model = Model.load(args.model)
+    from load_model import load_from_filepath
+    model, (HEIGHT, WIDTH) = load_from_filepath(args.model, args.large) 
 
     # screen box is (x, y, width, height)
     app = App(args.debug, args.preview)
     app.bounding_box = (677, 289, 325, 500)
 
-    predictor = Predictor(model, INPUT_SHAPE)
+    predictor = Predictor(model, (HEIGHT, WIDTH))
     predictor.acceleration = 5
 
     # screenshotter = D3DScreenshot()
@@ -98,8 +89,13 @@ class App:
             predictor.additional_delay = screen_shot_delay+click_delay+preview_delay
 
             start = default_timer()
-            detected_bounding_box, real_bounding_box = predictor.predict(image)
-            x, y, _, _ = map_bounding_box(real_bounding_box, image.shape[:2])
+
+            prediction = predictor.predict(image)
+
+            if prediction:
+                detected_bounding_box, real_bounding_box = prediction
+                x, y, _, _ = map_bounding_box(real_bounding_box, image.shape[:2])
+
             end = default_timer()
             model_time = end-start
 
@@ -109,23 +105,27 @@ class App:
                 last_frame_time = current_frame_time
                 print("\r{:.02f}ms/frame @ {:.02f}fps".format(overall_time*1000, 1/overall_time), end='')
 
-            reached_top = y < (screen_height * 0.30)
+            if prediction:
+                reached_top = y < (screen_height * 0.30)
 
-            x = x + screen_x
-            y = y + screen_y
+                x = x + screen_x
+                y = y + screen_y
 
-            dy = y-last_y
-            last_y = y
+                dy = y-last_y
+                last_y = y
 
-            if self.check_mouse_inside(self.bounding_box, (x, y)) and not self.is_paused:
-                # if dy >= 0 and not reached_top:
-                if dy >= 0:
-                    pyautogui.click(x=x, y=y)
+                if self.check_mouse_inside(self.bounding_box, (x, y)) and not self.is_paused:
+                    # if dy >= 0 and not reached_top:
+                    if dy >= 0:
+                        pyautogui.click(x=x, y=y)
             
             if self.show_preview:
                 start = default_timer()
                 with self.preview_thread_lock:
-                    self.preview = (image, detected_bounding_box, real_bounding_box)
+                    if prediction:
+                        self.preview = (image, detected_bounding_box, real_bounding_box)
+                    else:
+                        self.preview = (image, None, None)
                 end = default_timer()    
                 preview_delay = end-start
 
@@ -185,10 +185,12 @@ class App:
                 continue
             # construct preview 
             image, detected_bounding_box, real_bounding_box = preview 
-            draw_bounding_box(image, detected_bounding_box)
-            draw_bounding_box(image, real_bounding_box, (255, 0, 0))
+
+            if detected_bounding_box is not None:
+                draw_bounding_box(image, detected_bounding_box)
+                draw_bounding_box(image, real_bounding_box, (255, 0, 0))
             # display
-            cv2.imshow(window_name, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+            cv2.imshow(window_name, cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
             if cv2.waitKey(100) & 0xFF == ord('q'):
                 cv2.destroyAllWindows()
 
