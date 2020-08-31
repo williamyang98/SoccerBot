@@ -17,7 +17,7 @@ pyautogui.PAUSE = 0
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--preview", action='store_true')
-    parser.add_argument("--model", default="assets/models/.h5")
+    parser.add_argument("--model", default="assets/models/cnn_113_80.h5f")
     parser.add_argument("--large", action="store_true")
     parser.add_argument("--debug", action="store_true")
 
@@ -44,6 +44,7 @@ class App:
         self.is_paused = True
         self.show_debug = show_debug
         self.show_preview = show_preview
+        self.track_only = False
         self.bounding_box = (0, 0, 0, 0)
         
         self.resume_key = Key.f1
@@ -51,6 +52,7 @@ class App:
         self.exit_key = Key.f3
         self.preview_key = Key.f4
         self.debug_key = Key.f5
+        self.track_key = Key.f6
 
         self.input_listener = Listener(on_press=self.on_press)
         self.preview = None
@@ -117,7 +119,10 @@ class App:
                 if self.check_mouse_inside(self.bounding_box, (x, y)) and not self.is_paused:
                     # if dy >= 0 and not reached_top:
                     if dy >= 0:
-                        pyautogui.click(x=x, y=y)
+                        if self.track_only:
+                            pyautogui.moveTo(x=x, y=y)
+                        else:
+                            pyautogui.click(x=x, y=y)
             
             if self.show_preview:
                 start = default_timer()
@@ -141,6 +146,7 @@ class App:
         print("F3 : Exit")
         print("F4 : Preview key")
         print("F5 : Debug key")
+        print("F6 : Track only")
         print("==============")
 
     def on_press(self, key):
@@ -159,6 +165,9 @@ class App:
         elif key == self.debug_key:
             self.show_debug = not self.show_debug
             print("[Debug={0}]".format(self.show_debug))
+        elif key == self.track_key:
+            self.track_only = not self.track_only
+            print("[Track={0}]".format(self.track_only))
 
     def check_mouse_inside(self, screen_bounding_box, pos):
         screen_x, screen_y, screen_width, screen_height = screen_bounding_box

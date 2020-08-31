@@ -1,5 +1,0 @@
-numpy
-Keras
-tensorflow
-opencv_python
-Pillow
