@@ -29,5 +29,5 @@ def draw_bounding_box(image, bounding_box, colour=(0, 20, 200)):
     top = int(y_centre-height/2)
     bottom = int(y_centre+height/2)
     
-    cv2.rectangle(image, (left, top), (right, bottom), colour, 2)
+    cv2.rectangle(image, (left, top), (right, bottom), colour[::-1], 2)
     return image

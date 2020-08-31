@@ -9,9 +9,10 @@ BLUE = (0, 135, 255)
 YELLOW = (255, 241, 192, 10)
 
 FIREWORK_COLOURS = [
-    (155, 225, 146),
-    (255, 149, 234),
-    (252, 214, 81)
+    (86, 213, 77),      # green
+    (255, 149, 234),    # pink
+    (252, 214, 81),     # yellow
+    (79, 228, 255),     # blue
 ]
 
 class BasicSampleGenerator:
@@ -24,11 +25,6 @@ class BasicSampleGenerator:
         size = self.config.background_image.size
         sample = self.create_background(size)
         score = random.randint(0, 60)
-
-        if random.uniform(0, 1) > 0.5:
-            text_colour = GREY
-        else:
-            text_colour = BLUE
         
         if score > 10:
             self.create_light_beams(sample)
@@ -37,9 +33,24 @@ class BasicSampleGenerator:
             self.create_fireworks(sample)
 
         create_ui(sample, self.config.background_image)
+
+        # create score
+        if random.uniform(0, 1) > 0.5:
+            text_colour = GREY
+        else:
+            text_colour = BLUE
+
+        if score > 30:
+            score = random.randint(30, 100000)
+            text_colour = GREY
+
         create_score(sample, self.config.score_font, score, text_colour)        
 
-        bounding_box = create_ball(sample, self.config.ball_image, (0, 360))
+        has_ball = random.randint(0, 1)
+        if has_ball:
+            bounding_box = create_ball(sample, self.config.ball_image, (0, 360))
+        else:
+            bounding_box = (0, 0, 0, 0)
 
         for _ in range(random.randint(0, 4)):
             sample_type = random.uniform(0, 1)
@@ -53,10 +64,8 @@ class BasicSampleGenerator:
                 populate_emotes(sample, self.config.emote_images, total=(0, 10))
             else:
                 pass
-        
-        label = bounding_box
-
-        return (sample, label)
+            
+        return (sample, bounding_box, has_ball)
 
     def create_light_beams(self, sample, x_offset=100, max_light_beams=5):
         width, height = sample.size
