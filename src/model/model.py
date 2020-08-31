@@ -1,6 +1,11 @@
-import keras
-from keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization, Input
-from keras.layers import Conv2D, MaxPooling2D, SeparableConv2D
+# import keras
+import tensorflow.keras as keras
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization, Input
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, SeparableConv2D
+from tensorflow.keras.layers import LeakyReLU
+
+from tensorflow.keras.optimizers import Adam
 
 from .evaluation import calculate_IOU, calculate_loss
 
@@ -43,50 +48,50 @@ class Model:
         dropout = 0.1
 
         layers = [
-            keras.layers.Conv2D(16, kernel_size=(3, 3), strides=1, input_shape=input_shape),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+            Conv2D(16, kernel_size=(3, 3), strides=1, input_shape=input_shape),
+            LeakyReLU(alpha=alpha),
+            # Dropout(dropout),
+            MaxPooling2D(pool_size=(2, 2)),
 
-            keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+            Conv2D(32, kernel_size=(3, 3), strides=1),
+            LeakyReLU(alpha=alpha),
+            # Dropout(dropout),
+            MaxPooling2D(pool_size=(2, 2)),
 
-            keras.layers.Conv2D(32, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+            Conv2D(32, kernel_size=(3, 3), strides=1),
+            LeakyReLU(alpha=alpha),
+            # Dropout(dropout),
+            MaxPooling2D(pool_size=(2, 2)),
 
-            keras.layers.Conv2D(64, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+            Conv2D(64, kernel_size=(3, 3), strides=1),
+            LeakyReLU(alpha=alpha),
+            # Dropout(dropout),
+            MaxPooling2D(pool_size=(2, 2)),
 
-            keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.Conv2D(128, kernel_size=(3, 3), strides=1),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.MaxPooling2D(pool_size=(2, 2)),
+            Conv2D(128, kernel_size=(3, 3), strides=1),
+            LeakyReLU(alpha=alpha),
+            # Dropout(dropout),
+            Conv2D(128, kernel_size=(3, 3), strides=1),
+            LeakyReLU(alpha=alpha),
+            # Dropout(dropout),
+            MaxPooling2D(pool_size=(2, 2)),
 
-            keras.layers.Flatten(),
+            Flatten(),
 
-            keras.layers.Dense(120),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.Dense(62),
-            keras.layers.LeakyReLU(alpha=alpha),
-            # keras.layers.Dropout(dropout),
-            keras.layers.Dense(output_shape[0]),
-            keras.layers.LeakyReLU(alpha=alpha),
+            Dense(120),
+            LeakyReLU(alpha=alpha),
+            # Dropout(dropout),
+            Dense(62),
+            LeakyReLU(alpha=alpha),
+            # Dropout(dropout),
+            Dense(output_shape[0]),
+            LeakyReLU(alpha=alpha),
         ]
 
-        model = keras.Sequential(layers)
+        model = Sequential(layers)
 
         model.compile(
-            optimizer=keras.optimizers.Adam(lr=hyperparams.get("learning_rate", 0.0001)),
+            optimizer=Adam(lr=hyperparams.get("learning_rate", 0.0001)),
             loss=calculate_loss,
             metrics=hyperparams.get("metrics", [calculate_IOU, "accuracy"])
         )
