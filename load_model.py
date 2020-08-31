@@ -83,3 +83,9 @@ def load_from_filepath(filepath, large):
     print(model.summary())
 
     return (model, (HEIGHT, WIDTH))
+
+def load_quantized_model_from_filepath(filepath):
+    from src.model import LiteModel
+    with open(filepath, "rb") as fp:
+        return LiteModel(fp.read())
+

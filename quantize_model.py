@@ -1,20 +1,19 @@
 import os
-import tensorflow as tf
 import argparse
 
-from src.model import Model
-
-MODEL_DIR = "assets/model/"
+MODEL_DIR = "assets/models/"
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-in", default=os.path.join(MODEL_DIR, "model.h5"))
+    parser.add_argument("--model-in", default=os.path.join(MODEL_DIR, "cnn_113_80.h5f"))
     parser.add_argument("--model-out", default=os.path.join(MODEL_DIR, "quantized-model.tflite"))
+    parser.add_argument("--large", action="store_true")
 
     args = parser.parse_args()
 
-    # create using weights
-    model = Model.load(args.model_in)
+    from load_model import load_from_filepath
+    model, (HEIGHT, WIDTH) = load_from_filepath(args.model_in, args.large)
+
 
     # quantize and store as bytefile
     quantized_model = convert(model)
@@ -22,6 +21,7 @@ def main():
         file.write(quantized_model)
 
 def convert(model):
+    import tensorflow as tf
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
     # converter.inference_input_type = tf.uint8
