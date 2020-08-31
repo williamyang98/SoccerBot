@@ -24,5 +24,6 @@ python3 soccer.py
 ```
 
 ## Performance
-- Gets 30ms per frame on a i5-7200u (mobile) 
+- Gets 30ms per frame on a i5-7200u (30fps) (laptop cpu) 
+- Gets 30ms per frame on a fx-6350 (30fps) (desktop cpu) 
 - Can essentially get an infinite score
