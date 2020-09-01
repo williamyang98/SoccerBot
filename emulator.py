@@ -32,8 +32,11 @@ def main():
 
     clock = pg.time.Clock()
 
-    score_counter = ScoreCounter(FONT_FILEPATH, 18)
-    score_counter.set_pos(SCREEN_WIDTH-12, 40)
+    high_score_counter = HighScoreCounter(FONT_FILEPATH, 18)
+    high_score_counter.pos = Vec2D(SCREEN_WIDTH-12, 40)
+
+    score_counter = ScoreCounter(FONT_FILEPATH)
+    score_counter.pos = Vec2D(SCREEN_WIDTH//2, 85)
 
     emote_manager = EmoteManager(images)
 
@@ -41,6 +44,8 @@ def main():
     ball.pos = ball_spawn.copy()
 
     started = False
+    score = 0
+    high_score = 0
 
     running = True
     while running:
@@ -62,10 +67,11 @@ def main():
 
                     dist = (mouse_pos-ball.pos).length()
                     if dist < ball.radius:
-                        if started:
-                            score_counter.score += 1
-                        else:
-                            started = True
+                        started = True
+                        score += 1
+
+                        # high_score_counter.score = score 
+                        score_counter.set_state(score, started)
 
                         min_bounce_vel = 900
                         max_bounce_vel = 2200
@@ -84,8 +90,7 @@ def main():
 
                         emote_manager.create_success(emote_pos)
                     else:
-                        if started:
-                            emote_manager.create_emote(emote_pos)
+                        emote_manager.create_emote(emote_pos)
                 
 
         # physics
@@ -107,13 +112,19 @@ def main():
             if ball.pos.y-ball.radius > SCREEN_HEIGHT:
                 started = False
                 ball.pos = ball_spawn.copy()
-                score_counter.score = 0
+                high_score = max(score, high_score)
+                high_score_counter.score = high_score
+                score_counter.set_state(high_score, started)
+                score = 0
+                
 
         emote_manager.update(dt)
 
         # render
         surface.fill((255,255,255))
+        high_score_counter.render(surface)
         score_counter.render(surface)
+
         ball.render(surface)
         emote_manager.render(surface)
         
@@ -212,20 +223,54 @@ class EmoteManager:
             emote.render(surface)
 
 class ScoreCounter:
+    def __init__(self, font_path):
+        self.small_font = pg.font.Font(font_path, 18)
+        self.large_font = pg.font.Font(font_path, 75)
+
+        self.primary_colour = (0,121,241)
+        self.secondary_colour = (128,128,128)
+
+        self.pos = Vec2D(0, 0)
+        self.start_text = self.small_font.render("Current Best", True, self.secondary_colour)
+
+        self.set_state(0, False)
+
+        self.y_diff = 85
+
+    def set_state(self, score, started):
+        colour = self.primary_colour if not started else self.secondary_colour
+        self.score_text = self.large_font.render(f"{score}", True, colour)
+        self.started = started
+    
+    def render(self, surface):
+        x, y = self.pos.x, self.pos.y
+        if not self.started:
+            width, height = self.start_text.get_size()
+            rect = self.start_text.get_rect()
+            rect.center = (x, y)
+            surface.blit(self.start_text, rect)
+            y_off = self.y_diff
+        else:
+            _, y_off = self.start_text.get_size()
+
+        width, height = self.score_text.get_size()
+        rect = self.score_text.get_rect()
+        rect.center = (x, y+y_off)
+        surface.blit(self.score_text, rect)
+
+class HighScoreCounter:
     def __init__(self, font_path, size): 
         self.font = pg.font.Font(font_path, size)
         # self.font.set_bold(True)
         self.colour = (0,0,0)
         self.top_text = self.font.render("High Score", True, self.colour)
 
-        self._score = 100 
+        self._score = 0 
         self.score_text = self.font.render(f"{self.score}", True, self.colour)
 
         self.y_diff = 25 
 
-        self.top_rect = self.top_text.get_rect()
-        self.score_rect = self.score_text.get_rect()
-        self.set_pos(0, 0)
+        self.pos = Vec2D(0, 0)
 
     @property
     def score(self):
@@ -235,22 +280,20 @@ class ScoreCounter:
     def score(self, score):
         self._score = score
         self.score_text = self.font.render(f"{self._score}", True, self.colour)
-
-        x, y = self.pos
-        width, height = self.score_text.get_size()
-        self.score_rect =self.score_text.get_rect()
-        self.score_rect.center = (x-width//2, y+self.y_diff)
-    
-    def set_pos(self, x, y):
-        self.pos = (x, y)
-        width, height = self.top_text.get_size()
-        self.top_rect.center = (x-width//2, y)
-        width, height = self.score_text.get_size()
-        self.score_rect.center = (x-width//2, y+self.y_diff)
     
     def render(self, surface):
-        surface.blit(self.top_text, self.top_rect)
-        surface.blit(self.score_text, self.score_rect)
+        x, y = self.pos.x, self.pos.y
+
+        width, height = self.top_text.get_size()
+        top_rect = self.top_text.get_rect()
+        top_rect.center = (x-width//2, y)
+
+        width, height = self.score_text.get_size()
+        score_rect = self.score_text.get_rect()
+        score_rect.center = (x-width//2, y+self.y_diff)
+
+        surface.blit(self.top_text, top_rect)
+        surface.blit(self.score_text, score_rect)
 
 
 class Ball:
