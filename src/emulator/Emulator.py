@@ -9,6 +9,7 @@ from .EmoteManager import EmoteManager
 from .HighScoreCounter import HighScoreCounter
 from .ScoreCounter import ScoreCounter
 from .BeamManager import BeamManager
+from .FireworkManager import FireworkManager
 
 from .ImageLoader import ImageLoader
 
@@ -39,6 +40,7 @@ class Emulator:
 
         self.emote_manager = EmoteManager(self.images)
         self.beam_manager = BeamManager(window_size)
+        self.firework_manager = FireworkManager(window_size, max_fireworks=15)
 
         self.ball_spawn = Vec2D(window_size.x//2, window_size.y-self.ball.radius-10)
         self.on_fail()
@@ -47,6 +49,7 @@ class Emulator:
     def update(self, dt):
         self.emote_manager.update(dt)
         self.beam_manager.update(dt)
+        self.firework_manager.update(dt)
 
         if not self.playing:
             return
@@ -66,9 +69,10 @@ class Emulator:
         self.high_score_counter.render(surface)
         self.score_counter.render(surface)
         self.ball.render(surface)
-        self.emote_manager.render(surface)
 
+        self.firework_manager.render(surface)
         self.beam_manager.render(surface)
+        self.emote_manager.render(surface)
     
     def on_fail(self):
         self.playing = False
@@ -81,6 +85,7 @@ class Emulator:
         self.score = 0
 
         self.beam_manager.reset()
+        self.firework_manager.reset()
 
     def on_click(self, x, y):
         mouse_pos = Vec2D(x, y)
@@ -98,6 +103,7 @@ class Emulator:
         self.score_counter.set_state(self.score, self.playing)
         self.bounce_ball(mouse_pos)
         self.beam_manager.on_score(self.score)
+        self.firework_manager.on_score(self.score)
     
     def bounce_ball(self, mouse_pos):
         ball = self.ball
