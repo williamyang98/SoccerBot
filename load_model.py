@@ -89,3 +89,20 @@ def load_quantized_model_from_filepath(filepath):
     with open(filepath, "rb") as fp:
         return LiteModel(fp.read())
 
+def load_any_model_filepath(filepath, quantized, large):
+    if not quantized:
+        from load_model import load_from_filepath
+        model, (HEIGHT, WIDTH) = load_from_filepath(filepath, large) 
+    else:
+        from load_model import load_quantized_model_from_filepath
+        model = load_quantized_model_from_filepath(filepath)
+        input_shape = model.input_shape
+        HEIGHT, WIDTH, _ = input_shape
+
+    if quantized: 
+        print(f"loaded model {HEIGHT}x{WIDTH} (quantized={quantized})")
+    else:
+        print(f"loaded model {HEIGHT}x{WIDTH} (largs={large})")
+    
+    return (model, (HEIGHT, WIDTH))
+

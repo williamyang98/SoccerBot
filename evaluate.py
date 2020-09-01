@@ -4,26 +4,15 @@ import numpy as np
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="assets/models/cnn_227_160_quantized.tflite")
-    parser.add_argument("--quantized", action="store_false")
+    parser.add_argument("--checkpoint", action="store_true")
     # parser.add_argument("--model", default="assets/models/cnn_113_80.h5f")
     # parser.add_argument("--quantized", action="store_true")
     parser.add_argument("--large", action="store_true")
 
     args = parser.parse_args()
 
-    if not args.quantized:
-        from load_model import load_from_filepath
-        model, (HEIGHT, WIDTH) = load_from_filepath(args.model, args.large) 
-    else:
-        from load_model import load_quantized_model_from_filepath
-        model = load_quantized_model_from_filepath(args.model)
-        input_shape = model.input_shape
-        HEIGHT, WIDTH, _ = input_shape
-
-    if args.quantized: 
-        print(f"loaded model {HEIGHT}x{WIDTH} (quantized={args.quantized})")
-    else:
-        print(f"loaded model {HEIGHT}x{WIDTH} (largs={args.large})")
+    from load_model import load_any_model_filepath
+    model, (HEIGHT, WIDTH) = load_any_model_filepath(args.model, not args.checkpoint, args.large)
 
     import tensorflow as tf
     from load_tf_records import get_test_dataset

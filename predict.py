@@ -18,12 +18,13 @@ def main():
     parser.add_argument("--input-files", default=os.path.join(IMAGES_DIR, "*JPEG"))
     parser.add_argument("--output-dir", default=os.path.join(PREDICTION_DIR))
     parser.add_argument("--model", type=str, default=os.path.join(MODEL_DIR, "cnn_113_80.h5f"))
+    parser.add_argument("--quantized", action="store_true")
     parser.add_argument("--large", action="store_true")
 
     args = parser.parse_args()
 
-    from load_model import load_from_filepath
-    model, (HEIGHT, WIDTH) = load_from_filepath(args.model, args.large) 
+    from load_model import load_any_model_filepath
+    model, (HEIGHT, WIDTH) = load_any_model_filepath(args.model, args.quantized, args.large)
 
     # process all images
     filepaths = glob.glob(args.input_files)
@@ -47,7 +48,7 @@ def parse_images(model, filepaths, output_dir, input_size):
 
     print()
 
-def parse_image(model, input_file, input_size):
+def parse_image(model, input_file, input_size, threshold=0.5):
     image = Image.open(input_file)
     image = np.array(image)
 
@@ -59,7 +60,7 @@ def parse_image(model, input_file, input_size):
     end = default_timer()
 
     bounding_box = (x_pos, y_pos, 0.27, 0.18)
-    if confidence > 0.8:
+    if confidence > 0.5:
         draw_bounding_box(image, bounding_box)
 
     elapsed = end-start
