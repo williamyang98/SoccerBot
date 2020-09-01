@@ -15,12 +15,12 @@ pip install -r requirements.txt
 ## Instructions
 Execute the following command to align your game window to the correct position. Follow the on screen instructions to exit/resume/pause the bot.
 ```
-python3 soccer.py --preview
+python3 soccer.py
 ```
 
-Execute the following command to run without the preview window.
+Since Facebook has removed the messenger soccer app, there is an python clone of the game. You can run this using the following command.
 ```
-python3 soccer.py
+python3 emulator.py
 ```
 
 ## Performance
