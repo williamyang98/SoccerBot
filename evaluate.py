@@ -1,10 +1,12 @@
 import argparse
 import numpy as np
+import re
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="assets/models/cnn_227_160_quantized.tflite")
     parser.add_argument("--checkpoint", action="store_true")
+    parser.add_argument("--max-records", default=1, type=int)
     # parser.add_argument("--model", default="assets/models/cnn_113_80.h5f")
     # parser.add_argument("--quantized", action="store_true")
     parser.add_argument("--large", action="store_true")
@@ -17,8 +19,18 @@ def main():
     import tensorflow as tf
     from load_tf_records import get_test_dataset
 
-    record_filenames = sorted(tf.io.gfile.glob("./assets/data/records/images-*.tfrec"))
+    record_filenames = sorted(tf.io.gfile.glob("./assets/data/records/images-*.tfrec"))[:args.max_records]
 
+    p = re.compile(r".*images-[\d+]-(\d+).tfrec")
+    N = 0
+    for filename in record_filenames:
+        m = p.findall(filename)
+        if len(m) == 0:
+            print(f"couldnt extract record metadata from filename {filename}")
+            return
+        N += int(m[0])
+
+    print(f"detected dataset of size {N}")
     dataset = get_test_dataset(record_filenames, (HEIGHT, WIDTH))
 
     BATCH_SIZE = 128
