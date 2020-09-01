@@ -33,7 +33,8 @@ def main():
     # screen box is (x, y, width, height)
     app = App(args.debug, args.preview)
     # app.bounding_box = (677, 289, 325, 500)
-    app.bounding_box = (677, 289, 400, 550)
+    # app.bounding_box = (677, 289, 400, 550)
+    app.bounding_box = (677, 289, 322, 455)
 
     predictor = Predictor(model, (HEIGHT, WIDTH))
     predictor.acceleration = 5

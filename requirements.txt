@@ -26,6 +26,7 @@ protobuf==3.13.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 PyAutoGUI==0.9.50
+pygame==1.9.6
 PyGetWindow==0.0.8
 PyMsgBox==1.0.8
 pynput==1.7.1
