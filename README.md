@@ -24,6 +24,13 @@ python3 soccer.py
 ```
 
 ## Performance
+#### Large model (100,000 parameters - 117 kB quantized)
 - Gets 30ms per frame on a i5-7200u (30fps) (laptop cpu) 
 - Gets 30ms per frame on a fx-6350 (30fps) (desktop cpu) 
 - Can essentially get an infinite score
+
+#### Small model (30,000 parameters - 51kB quantized)
+- Gets 15ms per frame on a i5-7200u (60fps) (laptop cpu) 
+- Gets 15ms per frame on a fx-6350 (60fps) (desktop cpu) 
+- Can essentially get an infinite score 
+- Slightly lower model accuracy compared to large model
