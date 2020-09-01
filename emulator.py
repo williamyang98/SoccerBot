@@ -33,10 +33,10 @@ def main():
     clock = pg.time.Clock()
 
     high_score_counter = HighScoreCounter(FONT_FILEPATH, 18)
-    high_score_counter.pos = Vec2D(SCREEN_WIDTH-12, 40)
+    high_score_counter.pos = Vec2D(SCREEN_WIDTH-12, 50)
 
     score_counter = ScoreCounter(FONT_FILEPATH)
-    score_counter.pos = Vec2D(SCREEN_WIDTH//2, 85)
+    score_counter.pos = Vec2D(SCREEN_WIDTH//2, 65)
 
     emote_manager = EmoteManager(images)
 
@@ -235,7 +235,7 @@ class ScoreCounter:
 
         self.set_state(0, False)
 
-        self.y_diff = 85
+        self.y_diff = 65
 
     def set_state(self, score, started):
         colour = self.primary_colour if not started else self.secondary_colour
@@ -247,15 +247,16 @@ class ScoreCounter:
         if not self.started:
             width, height = self.start_text.get_size()
             rect = self.start_text.get_rect()
-            rect.center = (x, y)
+            rect.center = (x, y+height//2)
             surface.blit(self.start_text, rect)
             y_off = self.y_diff
         else:
-            _, y_off = self.start_text.get_size()
+            _, height = self.start_text.get_size()
+            y_off =  height
 
         width, height = self.score_text.get_size()
         rect = self.score_text.get_rect()
-        rect.center = (x, y+y_off)
+        rect.center = (x, y+height//2+y_off)
         surface.blit(self.score_text, rect)
 
 class HighScoreCounter:
