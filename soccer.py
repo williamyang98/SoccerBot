@@ -82,10 +82,13 @@ class App:
 
         last_y = 0
         last_frame_time = 0
-        click_delay = 10e-3
+        click_delay = 4e-3
         preview_delay = 0
 
         predictor.acceleration = 2.5
+
+        cooldown_duration = 0
+        cooldown = 0
 
         while self.is_running:
             if not self.show_preview and self.is_paused:
@@ -116,7 +119,7 @@ class App:
                 print("\r{:.02f}ms/frame @ {:.02f}fps".format(overall_time*1000, 1/overall_time), end='')
 
             if prediction:
-                reached_top = y < (screen_height * 0.40)
+                reached_top = y < (screen_height * 0.50)
 
                 x = x + screen_x
                 y = y + screen_y
@@ -125,15 +128,21 @@ class App:
                 last_y = y
 
                 if self.check_mouse_inside(self.bounding_box, (x, y)) and not self.is_paused:
-                    if dy >= 0 and not reached_top or dy <= -70:
+                    # if dy >= 0 and not reached_top or dy <= -70:
+                    if (dy >= 0 and not reached_top) or dy >= 100:
+                    # if (dy >= 0 and not reached_top):
+                    # if dy >= 0 and not reached_top:
                     # if dy >= 0:
                     # if True:
-                        if self.track_only:
+                        if cooldown > 0:
+                            cooldown -= 1
+                        elif self.track_only:
                             pyautogui.moveTo(x=x, y=y)
                         else:
                             pyautogui.click(x=x, y=y)
-                    else:
-                        pyautogui.moveTo(x=x, y=y)
+                            cooldown = cooldown_duration
+                    # else:
+                        # pyautogui.moveTo(x=x, y=y)
             
             if self.show_preview:
                 start = default_timer()
