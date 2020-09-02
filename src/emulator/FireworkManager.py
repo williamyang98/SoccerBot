@@ -28,6 +28,8 @@ class FireworkManager:
         if self.last_score >= 30 and\
             len(self.fireworks) < self.max_fireworks and\
             random.random() > 0.97:
+        # if len(self.fireworks) < self.max_fireworks and\
+        #     random.random() > 0.97:
             self.add_firework()
 
         alive_fireworks = set()
@@ -37,7 +39,7 @@ class FireworkManager:
                 alive_fireworks.add(firework)
 
         self.fireworks = alive_fireworks
-        
+    
     def add_firework(self):
         y_start = self.window_size.y + 100
 
@@ -47,12 +49,12 @@ class FireworkManager:
 
         
         x_end = random.randint(
-            int(self.window_size.x*0.2),
-            int(self.window_size.x*0.8))
+            int(self.window_size.x*0.05),
+            int(self.window_size.x*0.95))
 
         y_end = random.randint(
-            int(self.window_size.y*0.2),
-            int(self.window_size.y*0.7))
+            int(self.window_size.y*0.05),
+            int(self.window_size.y*0.65))
         
         start = Vec2D(x_start, y_start)
         end = Vec2D(x_end, y_end)
