@@ -39,8 +39,17 @@ def main():
     
     pg.quit()
 
+    with open("emulator.log", "a") as fp:
+        fp.write("[session begin]\n")
+        fp.write(f"deaths: {emulator.total_deaths}\n")
+        fp.write(f"highscore: {emulator.highscore}\n")
+        fp.write(f"scores: {','.join(map(str, emulator.scores))}\n")
+        fp.write(f"clicks: {','.join(map(str, emulator.all_clicks))}\n")
+        fp.write("\n")
+
 
 if __name__ == '__main__':
     main()
+
     
 
