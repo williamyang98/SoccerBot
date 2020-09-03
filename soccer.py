@@ -10,7 +10,7 @@ from src.util import draw_bounding_box
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="assets/models/cnn_227_160_quantized.tflite")
+    parser.add_argument("--model", default="assets/models/cnn_113_80_quantized.tflite")
     parser.add_argument("--checkpoint", action="store_true")
     parser.add_argument("--large", action="store_true")
     args = parser.parse_args()
