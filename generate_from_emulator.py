@@ -7,16 +7,23 @@ import cv2
 import os
 import re
 import glob
-
+from argparse import ArgumentParser
 from src.emulator import *
 
 ASSETS_DIR = "./assets/"
-OUTPUT_DIR = "./assets/data/emulator_records/"
+DEFAULT_OUTPUT_DIR = "./assets/data/emulator_records/"
 
 def main():
+    parser = ArgumentParser()
+    parser.add_argument("--fps", type=int, default=30)
+    parser.add_argument("--record-size", type=int, default=10000)
+    parser.add_argument("--out-dir", default=DEFAULT_OUTPUT_DIR)
+    args = parser.parse_args()
+
     SCREEN_WIDTH = 322
     SCREEN_HEIGHT = 455
-    TARGET_FPS = 60
+
+    TARGET_FPS = args.fps 
 
     pg.init()
     surface = pg.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
@@ -24,44 +31,12 @@ def main():
 
     emulator = Emulator(ASSETS_DIR, Vec2D(SCREEN_WIDTH, SCREEN_HEIGHT))
     emulator.firework_manager.max_fireworks = 12
+    emulator.firework_manager.spawn_chance = 0.9 
 
     running = True
-
     total_frames = 0
-    MAX_RECORD_SIZE = 10000
-    record_size = 0
-    current_record = 0
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    X = glob.glob(os.path.join(OUTPUT_DIR, "sample_*.tfrec"))
-    p = re.compile(r".*sample_(\d+)_\d+\.tfrec")
-    res = map(p.findall, X)
-    res = filter(lambda m: len(m) > 0, res)
-    res = map(lambda m: int(m[0]), res)
-    res = sorted(res)
-
-    if len(res) > 0:
-        current_record = res[-1] + 1
-        print(f"moving head to record {current_record}")
-
-    record_filename = os.path.join(OUTPUT_DIR, f"sample_{current_record}.tfrec")
-
-    import tensorflow as tf
     from create_tf_record_example import serialize_example
-
-    writer = tf.io.TFRecordWriter(record_filename)
-
-    def create_record():
-        current_record += 1
-        record_size = 0
-        record_filename = os.path.join(OUTPUT_DIR, f"sample_{current_record}.tfrec")
-        writer = tf.io.TFRecordWriter(record_filename)
-
-    def save_record():
-        writer.close()
-        new_record_filename = os.path.join(OUTPUT_DIR, f"sample_{current_record}_{record_size}.tfrec")
-        os.rename(record_filename, new_record_filename)
 
     def get_label():
         x, y = emulator.ball.pos.x, emulator.ball.pos.y
@@ -74,16 +49,12 @@ def main():
         else:
             confidence = 1
         return (x, y, confidence)
+    
+    show_preview = False
 
-    try:
+    with BatchedWriter(args.record_size, args.out_dir) as writer:
         while running:
-            # frame_ms = clock.tick(TARGET_FPS)
-            # dt = frame_ms*1e-3
             dt = 1/TARGET_FPS
-
-            # ball_pos = emulator.ball.pos.copy()
-            # click_pos = None
-
             ball = emulator.ball
 
             x, y = emulator.ball.pos.x, emulator.ball.pos.y
@@ -93,17 +64,28 @@ def main():
 
             # simulate ai
             if confidence:
-                if ball.vel.y >= -100 and ball.pos.y > SCREEN_HEIGHT*0.6 and random.random() > 0.15:
+                score = random.randint(0, 100000)
+                emulator.high_score_counter.score = score
+                emulator.score_counter.set_state(score, True)
+                if ball.vel.y >= -10 and ball.pos.y > SCREEN_HEIGHT*0.7:
+                    radius = int(ball.radius*0.8)
+                    dx = random.randint(-radius, radius)
+                    dy = random.randint(-radius, radius)
+                    off = Vec2D(dx, dy)
+                    off = off.norm() * radius
+                    mouse_pos = ball.pos+off
+                    emulator.on_click(mouse_pos.x, mouse_pos.y)
+                elif ball.vel.y >= -100 and ball.pos.y > SCREEN_HEIGHT*0.6 and random.random() > 0.1:
                     radius = int(ball.radius * 1.1)
                     dx = random.randint(-radius, radius)
                     dy = random.randint(-radius, radius)
                     emulator.on_click(ball.pos.x+dx, ball.pos.y+dy)
-                elif random.random() > 0.95:
+                elif random.random() > 0.92:
                     radius = int(ball.radius * 1.5) 
                     dx = random.randint(-radius, radius)
                     dy = random.randint(-radius, radius)
                     emulator.on_click(ball.pos.x+dx, ball.pos.y+dy)
-                elif random.random() > 0.9:
+                elif random.random() > 0.8:
                     radius = int(ball.radius * 5) 
                     dx = random.randint(-radius, radius)
                     dy = random.randint(-radius, radius)
@@ -113,6 +95,9 @@ def main():
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
                     running = False
+                elif ev.type == pg.KEYDOWN:
+                    if ev.key == pg.K_p:
+                        show_preview = not show_preview
 
             # tick
             emulator.update(dt)
@@ -120,9 +105,8 @@ def main():
             emulator.render(surface)
 
             image = pg.surfarray.array3d(surface)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             image = np.transpose(image, axes=[1,0,2])
-            
             image = cv2.imencode(
                 '.jpg', image, 
                 (cv2.IMWRITE_JPEG_QUALITY, 94))[1].tostring()
@@ -130,29 +114,94 @@ def main():
             x, y, confidence = get_label()
             example = serialize_example(
                 image, 
-                str.encode(f"FRAME_{total_frames}.jpg"),
+                str.encode(f"f{total_frames}.jpg"),
                 x,
                 y,
                 confidence)
 
             writer.write(example)
-
             total_frames += 1
-            record_size += 1
-
             print(f"total frames: {total_frames}\r", end='')
 
-            if record_size >= MAX_RECORD_SIZE:
-                save_record()
-                create_record()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        # closing
-        print(f"\nwrote {total_frames} frames")
+            
+            if show_preview:
+                pg.display.flip()
 
-        if record_size > 0:
-            save_record()
+    # closing
+    print(f"\nwrote {total_frames} frames")
+
+    if emulator.score != 0:
+        emulator.on_fail()
+
+    with open("gen_emulator.log", "a") as fp:
+        fp.write("[session begin]\n")
+        fp.write(f"deaths: {emulator.total_deaths}\n")
+        fp.write(f"highscore: {emulator.highscore}\n")
+        fp.write(f"scores: {','.join(map(str, emulator.scores))}\n")
+        fp.write(f"clicks: {','.join(map(str, emulator.all_clicks))}\n")
+        fp.write("\n")
+
+class BatchedWriter:
+
+    def __init__(self, max_records, out_dir):
+        self.max_records = max_records
+        self.out_dir = out_dir
+
+        os.makedirs(self.out_dir, exist_ok=True)
+
+        self.current_record = self.get_head()
+        self.current_size = 0
+        self.create_new()
+    
+    def get_head(self):
+        X = glob.glob(os.path.join(self.out_dir, "images-*.tfrec"))
+        p = re.compile(r".*images-(\d+)-\d+\.tfrec")
+        res = map(p.findall, X)
+        res = filter(lambda m: len(m) > 0, res)
+        res = map(lambda m: int(m[0]), res)
+        res = sorted(res)
+
+        if len(res) > 0:
+            head = res[-1] + 1
+            print(f"moving head to record {head}")
+            return head
+        return 0
+
+    def write(self, example):
+        self.writer.write(example)
+        self.current_size += 1
+
+        if self.current_size >= self.max_records:
+            self.close()
+            self.current_size = 0
+            self.current_record += 1
+            self.create_new()
+        
+    def create_new(self):
+        import tensorflow as tf
+        filename = os.path.join(
+            self.out_dir,
+            f"images-{self.current_record}.tfrec")
+        self.writer = tf.io.TFRecordWriter(filename)
+    
+    def close(self):
+        self.writer.close()
+        if self.current_size == 0:
+            return
+
+        old_name = os.path.join(
+            self.out_dir,
+            f"images-{self.current_record}.tfrec")
+        new_name = os.path.join(
+            self.out_dir, 
+            f"images-{self.current_record}-{self.current_size}.tfrec")
+        os.rename(old_name, new_name)
+    
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
 if __name__ == '__main__':
     main()

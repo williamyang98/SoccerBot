@@ -10,6 +10,7 @@ class FireworkManager:
         self.fireworks = set()
         self.last_score = 0
         self.max_fireworks = max_fireworks
+        self.spawn_chance = 0.97
 
         self.colours = [
             (255, 196, 0),
@@ -27,7 +28,7 @@ class FireworkManager:
     def update(self, dt):
         if self.last_score >= 30 and\
             len(self.fireworks) < self.max_fireworks and\
-            random.random() > 0.97:
+            random.random() > self.spawn_chance:
         # if len(self.fireworks) < self.max_fireworks and\
         #     random.random() > 0.97:
             self.add_firework()

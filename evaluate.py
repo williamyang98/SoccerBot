@@ -1,17 +1,24 @@
 import argparse
 import numpy as np
 import re
+import os
+import glob
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="assets/models/cnn_227_160_quantized.tflite")
+    parser.add_argument("dir")
+    parser.add_argument("--model", default="assets/models/cnn_113_80_quantized.tflite")
     parser.add_argument("--checkpoint", action="store_true")
-    parser.add_argument("--max-records", default=1, type=int)
-    # parser.add_argument("--model", default="assets/models/cnn_113_80.h5f")
-    # parser.add_argument("--quantized", action="store_true")
     parser.add_argument("--large", action="store_true")
-
     args = parser.parse_args()
+
+    p = re.compile(r".*images-\d+-(\d+).tfrec")
+
+    record_filenames = sorted(glob.glob(os.path.join(args.dir, "images-*.tfrec")))
+    record_filenames = list(filter(lambda x: len(p.findall(x)) > 0, record_filenames))
+
+    N = sum(map(lambda x: int(p.findall(x)[0]), record_filenames))
+    print(f"detected dataset of size {N}")
 
     from load_model import load_any_model_filepath
     model, (HEIGHT, WIDTH) = load_any_model_filepath(args.model, not args.checkpoint, args.large)
@@ -19,19 +26,6 @@ def main():
     import tensorflow as tf
     from load_tf_records import get_test_dataset
 
-    # record_filenames = sorted(tf.io.gfile.glob("./assets/data/records/images-*.tfrec"))[:args.max_records]
-    record_filenames = sorted(tf.io.gfile.glob("./assets/data/emulator_records/sample_*.tfrec"))[:args.max_records]
-
-    p = re.compile(r".*sample_\d+_(\d+).tfrec")
-    N = 0
-    for filename in record_filenames:
-        m = p.findall(filename)
-        if len(m) == 0:
-            print(f"couldnt extract record metadata from filename {filename}")
-            return
-        N += int(m[0])
-
-    print(f"detected dataset of size {N}")
     dataset = get_test_dataset(record_filenames, (HEIGHT, WIDTH))
 
     BATCH_SIZE = 128
@@ -65,8 +59,6 @@ def main():
 
     metrics = []
 
-    record_size = 10000
-    N = len(record_filenames)*record_size
     total_batches = N // BATCH_SIZE
     
     for batch_id, (images, labels) in enumerate(dataset.take(total_batches)):
@@ -91,8 +83,7 @@ def main():
     pos_acc = sum([m[1] for m in metrics]) / len(metrics)
 
     print()
-    print(">> Results summary")
-    print(f"detect_accuracy: {detect_acc:.2f} position_accuracy: {pos_acc:.2f}")
+    print(f"overall detect_accuracy: {detect_acc:.3f}, overall position_accuracy: {pos_acc:.3f}")
 
 if __name__ == '__main__':
     main()
