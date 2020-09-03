@@ -19,6 +19,7 @@ def main():
 
 
     running = True
+    paused = False
     clock = pg.time.Clock()
 
     while running:
@@ -28,11 +29,16 @@ def main():
         for ev in pg.event.get():
             if ev.type == pg.QUIT:
                 running = False
+            elif ev.type == pg.KEYDOWN:
+                if ev.key == pg.K_p:
+                    paused = not paused
             elif ev.type == pg.MOUSEBUTTONDOWN:
                 if ev.button == 1:
-                    emulator.on_click(*ev.pos)
+                    if not paused:
+                        emulator.on_click(*ev.pos)
 
-        emulator.update(dt)
+        if not paused:
+            emulator.update(dt)
         surface.fill((255,255,255))
         emulator.render(surface)
         pg.display.flip()

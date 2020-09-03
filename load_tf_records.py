@@ -5,7 +5,8 @@ AUTO = tf.data.experimental.AUTOTUNE
 def decode_image(image_data, target_size):
     image = tf.image.decode_jpeg(image_data, channels=3)
     image = tf.cast(image, tf.float32) / 255.0  # convert image to floats in [0, 1] range
-    image = tf.image.resize(image, target_size)
+    if target_size is not None:
+        image = tf.image.resize(image, target_size)
     image = tf.reverse(image, axis=[-1])
     #image = tf.reshape(image, [*TARGET_SIZE, 3]) # explicit size needed for TPU
     return image

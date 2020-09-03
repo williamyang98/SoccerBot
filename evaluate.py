@@ -19,9 +19,10 @@ def main():
     import tensorflow as tf
     from load_tf_records import get_test_dataset
 
-    record_filenames = sorted(tf.io.gfile.glob("./assets/data/records/images-*.tfrec"))[:args.max_records]
+    # record_filenames = sorted(tf.io.gfile.glob("./assets/data/records/images-*.tfrec"))[:args.max_records]
+    record_filenames = sorted(tf.io.gfile.glob("./assets/data/emulator_records/sample_*.tfrec"))[:args.max_records]
 
-    p = re.compile(r".*images-[\d+]-(\d+).tfrec")
+    p = re.compile(r".*sample_\d+_(\d+).tfrec")
     N = 0
     for filename in record_filenames:
         m = p.findall(filename)
