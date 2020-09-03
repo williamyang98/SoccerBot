@@ -1,5 +1,10 @@
 # Soccer Bot
 A soccer bot that uses a basic CNN to detect the ball and click on it.
+
+### Youtube Video
+[![SoccerBot](http://img.youtube.com/vi/zDZrXnTsxvo/0.jpg)](http://youtu.be/zDZrXnTsxvo "SoccerBot")
+
+### UI
 ![alt text](docs/main_ui.png "Main UI")
 
 ## Installation
